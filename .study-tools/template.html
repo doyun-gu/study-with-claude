@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>study-with-claude</title>
+<style>
+  :root {
+    --bg: #ffffff;
+    --fg: #1a1a1a;
+    --muted: #666666;
+    --border: #e0e0e0;
+    --code-bg: #f5f5f5;
+    --blockquote-border: #3b82f6;
+    --blockquote-bg: #eff6ff;
+    --link: #2563eb;
+    --table-stripe: #f9fafb;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1a2e;
+      --fg: #e0e0e0;
+      --muted: #999999;
+      --border: #333355;
+      --code-bg: #16213e;
+      --blockquote-border: #60a5fa;
+      --blockquote-bg: #1e293b;
+      --link: #93c5fd;
+      --table-stripe: #16213e;
+    }
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.7;
+    color: var(--fg);
+    background: var(--bg);
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+
+  /* YAML frontmatter */
+  #content > hr:first-child,
+  #content > hr:first-child + table,
+  #content > hr:first-child ~ hr:nth-of-type(2) {
+    display: none;
+  }
+
+  .frontmatter {
+    font-size: 0.85rem;
+    color: var(--muted);
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 2rem;
+    font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
+  }
+
+  h1 { font-size: 2rem; margin: 0.5rem 0 1.5rem; border-bottom: 2px solid var(--border); padding-bottom: 0.5rem; }
+  h2 { font-size: 1.5rem; margin: 2rem 0 1rem; border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; }
+  h3 { font-size: 1.25rem; margin: 1.5rem 0 0.75rem; }
+  h4 { font-size: 1.1rem; margin: 1.25rem 0 0.5rem; }
+
+  p { margin: 0.75rem 0; }
+
+  a { color: var(--link); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  strong { font-weight: 600; }
+
+  code {
+    font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
+    font-size: 0.9em;
+    background: var(--code-bg);
+    padding: 0.15em 0.4em;
+    border-radius: 4px;
+  }
+
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 1rem;
+    overflow-x: auto;
+    margin: 1rem 0;
+    line-height: 1.5;
+  }
+
+  pre code {
+    background: none;
+    padding: 0;
+    font-size: 0.85rem;
+  }
+
+  blockquote {
+    border-left: 4px solid var(--blockquote-border);
+    background: var(--blockquote-bg);
+    padding: 0.75rem 1rem;
+    margin: 1rem 0;
+    border-radius: 0 6px 6px 0;
+  }
+
+  blockquote p { margin: 0.25rem 0; }
+
+  ul, ol { padding-left: 1.5rem; margin: 0.75rem 0; }
+  li { margin: 0.3rem 0; }
+
+  /* Checkbox lists */
+  li input[type="checkbox"] {
+    margin-right: 0.5rem;
+    vertical-align: middle;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 1rem 0;
+    font-size: 0.95rem;
+  }
+
+  th, td {
+    border: 1px solid var(--border);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+  }
+
+  th {
+    background: var(--code-bg);
+    font-weight: 600;
+  }
+
+  tr:nth-child(even) { background: var(--table-stripe); }
+
+  hr {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 2rem 0;
+  }
+
+  img { max-width: 100%; height: auto; border-radius: 6px; }
+
+  /* MathJax display equations */
+  mjx-container[display="true"] {
+    margin: 1rem 0 !important;
+    overflow-x: auto;
+  }
+
+  @media print {
+    body { max-width: 100%; padding: 1rem; color: #000; background: #fff; }
+    h1 { font-size: 1.5rem; }
+    h2 { font-size: 1.25rem; }
+    pre, code { font-size: 0.8rem; }
+    blockquote { background: none; border-left-color: #999; }
+    a { color: #000; text-decoration: underline; }
+    a::after { content: " (" attr(href) ")"; font-size: 0.8em; }
+  }
+</style>
+<script>
+  window.MathJax = {
+    tex: {
+      inlineMath: [['$', '$']],
+      displayMath: [['$$', '$$']],
+      processEscapes: true
+    },
+    options: {
+      skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+    }
+  };
+</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+<div id="content"></div>
+<pre id="raw-content" style="display:none">{{BASE64_CONTENT}}</pre>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const encoded = document.getElementById('raw-content').textContent.trim();
+  const raw = atob(encoded);
+
+  // Custom renderer to handle YAML frontmatter
+  let body = raw;
+  let frontmatter = '';
+  if (raw.startsWith('---')) {
+    const endIdx = raw.indexOf('---', 3);
+    if (endIdx !== -1) {
+      frontmatter = raw.substring(3, endIdx).trim();
+      body = raw.substring(endIdx + 3).trim();
+    }
+  }
+
+  // Protect LaTeX blocks from marked.js processing
+  const latexBlocks = [];
+
+  // Protect display math ($$...$$)
+  body = body.replace(/\$\$([\s\S]*?)\$\$/g, function(match) {
+    latexBlocks.push(match);
+    return '%%LATEX_BLOCK_' + (latexBlocks.length - 1) + '%%';
+  });
+
+  // Protect inline math ($...$) but not currency like $5
+  body = body.replace(/\$([^\s$](?:[^$]*[^\s$])?)\$/g, function(match) {
+    latexBlocks.push(match);
+    return '%%LATEX_BLOCK_' + (latexBlocks.length - 1) + '%%';
+  });
+
+  // Parse markdown
+  const html = marked.parse(body);
+
+  // Restore LaTeX blocks
+  let finalHtml = html.replace(/%%LATEX_BLOCK_(\d+)%%/g, function(match, idx) {
+    return latexBlocks[parseInt(idx)];
+  });
+
+  // Add frontmatter display if present
+  let output = '';
+  if (frontmatter) {
+    output += '<div class="frontmatter">' + frontmatter.replace(/\n/g, '<br>') + '</div>';
+  }
+  output += finalHtml;
+
+  document.getElementById('content').innerHTML = output;
+
+  // Trigger MathJax rendering
+  if (window.MathJax && window.MathJax.typesetPromise) {
+    MathJax.typesetPromise().catch(function(err) {
+      console.warn('MathJax typeset error:', err);
+    });
+  }
+});
+</script>
+</body>
+</html>
