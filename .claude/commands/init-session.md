@@ -91,6 +91,80 @@ total_files: N
 - [List of detected gaps]
 ```
 
+### Step 6b: Generate `.study/file-map.md`
+
+Using the content already read during Step 2 (do NOT re-read any files), build a forward index mapping each file to its topics at page-level granularity:
+
+- For PDFs: identify topic-coherent page ranges (2-15 pages each) based on heading changes, new theorem/definition introductions, and subject shifts observed during the Step 2 scan
+- For markdown/text files: use H2/H3 section headings as the unit instead of pages
+- Record the file type and total page/section count
+
+Write `.study/file-map.md` with this structure:
+
+```markdown
+---
+generated: YYYY-MM-DD
+total_files: N
+total_pages: N
+---
+
+# File Map
+
+## [Module Name]
+
+### [relative/path/to/file.pdf]
+- **Pages:** N | **Type:** lecture slides
+
+| Pages | Topics | Key Content |
+|-------|--------|-------------|
+| 1-3 | Course overview | Syllabus, grading |
+| 4-11 | Basic circuit elements | Resistors, capacitors, inductors; passive sign convention |
+| 12-18 | Ohm's Law, KVL, KCL | Derivation, series/parallel circuits |
+
+### [relative/path/to/notes.md]
+- **Sections:** N | **Type:** notes
+
+| Section | Topics | Key Content |
+|---------|--------|-------------|
+| ## Basic Elements | Resistors, capacitors | Component equations, energy storage |
+| ## Kirchhoff's Laws | KVL, KCL | Statement, sign conventions |
+```
+
+Keep page ranges topic-coherent — group by subject, not by fixed chunk size. Aim for ~3-4K tokens for a typical 5-module course.
+
+### Step 6c: Generate `.study/content-index.md`
+
+Invert the file-map to create a reverse index (topic → locations):
+
+- For each topic mentioned in any file-map entry, collect all file+page locations where it appears
+- Alphabetize entries within each module
+- Add a type tag based on content type: `theory`, `formula`, `theorem`, `theorem+examples`, `theorem+derivation`, `method`, `derivation`, `examples`, `definition`, `law`
+- Include common aliases in parentheses for fuzzy matching: e.g., `Thevenin's theorem (Thevenin equivalent)`
+- Use `§` prefix for markdown section references
+
+Write `.study/content-index.md` with this structure:
+
+```markdown
+---
+generated: YYYY-MM-DD
+total_entries: N
+modules: [Module1, Module2]
+---
+
+# Content Index
+
+## [Module Name]
+
+| Topic | Locations | Type |
+|-------|-----------|------|
+| KCL | week-01/slides.pdf pp.15-18, week-01/notes.md §Kirchhoff's-Laws | law |
+| Norton's theorem | week-03/slides.pdf pp.19-30 | theorem+examples |
+| Ohm's Law | week-01/slides.pdf pp.12-13, week-01/notes.md §Basic-Elements | law |
+| Thevenin's theorem (Thevenin equivalent) | week-03/slides.pdf pp.3-18, week-03/notes.md §Thevenin | theorem+examples |
+```
+
+Aim for ~3K tokens for 150 entries. This index must be generated from the file-map data — no additional file reads.
+
 ### Step 7: Initialize/Update `.study/progress.md`
 
 If `.study/progress.md` doesn't exist, create it:

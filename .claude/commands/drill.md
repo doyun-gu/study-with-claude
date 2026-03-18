@@ -29,7 +29,13 @@ Read:
 - `.study/progress.md` — coverage data, exam dates
 - `.study/drill-log.md` — previous drill results and review schedule (if exists)
 
-Also read the **actual source material** (lecture slides, notes) for the selected topics. Questions must be grounded in real content, not generic.
+Also load source material for selected topics using the content index:
+1. Read `.study/content-index.md` to find source pages for selected topics
+2. Read `.study/file-map.md` to find worked examples near those topics
+3. Read ONLY the identified pages from source materials (specific PDF page ranges or markdown sections)
+4. If index files don't exist, fall back to reading full lecture slides and notes
+
+Questions must be grounded in real content, not generic.
 
 ### Step 3: Select Questions
 

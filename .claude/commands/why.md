@@ -8,7 +8,9 @@ You are answering a student's question in **direct answer mode**. This is the ON
 
 ### Step 1: Load Context
 
-- Read `.study/context.md` to understand available materials and modules.
+- Read `.study/content-index.md` to find exact file+page locations for the question's topic.
+- Read ONLY the identified pages from source materials (e.g., specific PDF page ranges or markdown sections).
+- If the topic is not found in the content index, or if `.study/content-index.md` doesn't exist, fall back to reading `.study/context.md` and scanning full materials.
 - Read `.study/qna-log.md` if it exists, to check for similar past questions.
 
 ### Step 2: Check for Duplicate Questions

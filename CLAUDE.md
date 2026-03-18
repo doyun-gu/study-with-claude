@@ -61,6 +61,8 @@ Students can use any naming convention for modules (e.g., `EE301-Circuits`, `pow
 
 All persistent state lives in `.study/`. This directory is gitignored — it contains student-specific data.
 
+> For system internals (dataflow, command dependencies, content index pattern), see `.context/architecture.md`.
+
 ### Files
 
 | File | Purpose | Updated by |
@@ -74,6 +76,8 @@ All persistent state lives in `.study/`. This directory is gitignored — it con
 | `cheat-sheet.md` | Emergency compact reference | `/i-am-fucked` |
 | `weekly-plan.md` | Structured study schedule | `/weekly-plan` |
 | `mock-exams/` | Generated practice exams | `/mock-exam` |
+| `file-map.md` | Page-level content map per file (forward index) | `/init-session`, `/big-picture` |
+| `content-index.md` | Reverse lookup: topic → file:pages | `/init-session`, `/big-picture` |
 | `drill-log.md` | Drill session history, per-topic scores, review schedule | `/drill`, `/review` |
 | `flash-log.md` | Flashcard inventory, spaced repetition intervals, session stats | `/flash`, `/review` |
 

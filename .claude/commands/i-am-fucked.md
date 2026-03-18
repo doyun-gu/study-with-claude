@@ -14,7 +14,7 @@ Read ALL `.study/` files:
 - `big-picture.md` — all equations and concepts
 - `diagnosis.md` — known weak areas
 
-Also read the actual module materials for any high-priority topics.
+Read `.study/content-index.md` to find pages for high-priority topics (from diagnosis + past-paper intersection). Read ONLY those targeted pages from source materials (specific PDF page ranges or markdown sections). If `.study/content-index.md` doesn't exist, fall back to reading full module materials for high-priority topics.
 
 ### Step 2: Ruthless Prioritization
 

@@ -106,6 +106,15 @@ total_definitions: N
 [Brief narrative connecting the major themes across all modules — how everything fits together]
 ```
 
+### Step 5b: Regenerate Index Files
+
+Since you just read all materials, regenerate `.study/file-map.md` and `.study/content-index.md` with fresh data. Follow the same format as `/init-session` Steps 6b and 6c:
+
+- **`.study/file-map.md`:** For each file read, build a page-range-to-topic mapping with topic-coherent blocks. For markdown files, use section headings.
+- **`.study/content-index.md`:** Invert the file-map into an alphabetical topic → locations reverse index with type tags and aliases.
+
+This keeps the index files up to date whenever a full material scan happens.
+
 ### Step 6: Terminal Summary + Browser Render
 
 **Terminal (5-10 lines only):**

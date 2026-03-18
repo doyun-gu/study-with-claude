@@ -25,7 +25,10 @@ Read:
 - `.study/diagnosis.md` — for weak areas to target
 - `.study/context.md` — for available material
 - `.study/big-picture.md` — for equations and concepts to test
-- Module lecture materials — for worked examples to vary
+- `.study/content-index.md` — for exact page locations per topic
+- `.study/file-map.md` — for finding worked examples to vary
+- Read ONLY the pages identified for each topic the exam will cover (specific PDF page ranges or markdown sections)
+- If index files don't exist, fall back to reading full module lecture materials
 
 ### Step 3: Design the Exam
 
