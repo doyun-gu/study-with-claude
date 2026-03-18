@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(sleep *)",
+      "Bash(say *)",
+      "Bash(printf *)",
+      "Bash(bash .study-tools/render.sh *)",
+      "Bash(open .study/rendered/*)",
+      "Bash(mkdir -p .study/rendered)",
+      "Bash(mkdir -p .study/mock-exams)",
+      "Read(.study/**)",
+      "Write(.study/**)",
+      "Glob(**/*)",
+      "Read(**/*.pdf)",
+      "Read(**/*.md)",
+      "Read(**/*.txt)"
+    ]
+  }
+}
