@@ -181,7 +181,8 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   const encoded = document.getElementById('raw-content').textContent.trim();
-  const raw = atob(encoded);
+  const bytes = Uint8Array.from(atob(encoded), c => c.charCodeAt(0));
+  const raw = new TextDecoder('utf-8').decode(bytes);
 
   // Custom renderer to handle YAML frontmatter
   let body = raw;
