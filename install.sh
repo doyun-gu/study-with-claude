@@ -46,10 +46,10 @@ symlink_file() {
     echo "  [ok] $LABEL symlinked"
 }
 
-# --- Symlink lets-go command ---
+# --- Symlink where-is-god command ---
 
 echo "Bootstrap command:"
-symlink_file "$SCRIPT_DIR/bootstrap/lets-go.md" "$COMMANDS_DIR/lets-go.md" "commands/lets-go.md"
+symlink_file "$SCRIPT_DIR/bootstrap/where-is-god.md" "$COMMANDS_DIR/where-is-god.md" "commands/where-is-god.md"
 echo ""
 
 # --- Summary ---
@@ -58,12 +58,12 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "  Installation complete!"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "The /lets-go command is now available globally."
+echo "The /where-is-god command is now available globally."
 echo ""
 echo "Usage:"
 echo "  cd ~/your-study-folder"
 echo "  claude"
-echo "  /lets-go"
+echo "  /where-is-god"
 echo ""
 echo "Restart Claude Code for changes to take effect."
 echo ""

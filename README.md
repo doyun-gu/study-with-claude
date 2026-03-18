@@ -6,17 +6,17 @@ All study data stays local on your machine. No accounts, no servers, no subscrip
 
 ## Install (Recommended)
 
-Install once, then use `/lets-go` to bootstrap any directory:
+Install once, then use `/where-is-god` to bootstrap any directory:
 
 ```bash
-# One-time setup — makes /lets-go available everywhere
+# One-time setup — makes /where-is-god available everywhere
 git clone https://github.com/yourusername/study-with-claude.git ~/study-with-claude
 cd ~/study-with-claude && bash install.sh
 
 # Then in any directory with your study materials:
 cd ~/my-courses
 claude
-/lets-go     # bootstraps everything — copies commands, tools, CLAUDE.md
+/where-is-god     # bootstraps everything — copies commands, tools, CLAUDE.md
 /init-session     # scan your materials and start studying
 ```
 

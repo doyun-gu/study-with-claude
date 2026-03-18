@@ -2,14 +2,14 @@
 set -e
 
 # study-with-claude bootstrap script
-# Called by /lets-go prompt — does all file copying natively (zero LLM tokens)
+# Called by /where-is-god prompt — does all file copying natively (zero LLM tokens)
 
 # --- Resolve source repo path from symlink ---
 
-SYMLINK="$HOME/.claude/commands/lets-go.md"
+SYMLINK="$HOME/.claude/commands/where-is-god.md"
 
 if [ ! -L "$SYMLINK" ]; then
-    echo "Error: lets-go.md is not installed as a symlink."
+    echo "Error: where-is-god.md is not installed as a symlink."
     echo "Run: cd ~/study-with-claude && bash install.sh"
     exit 1
 fi
@@ -30,7 +30,7 @@ TARGET_DIR="$(pwd)"
 case "$TARGET_DIR" in
     "$SOURCE_ROOT"*)
         echo "Error: You're inside the source repo itself ($SOURCE_ROOT)."
-        echo "cd to your study directory first, then run /lets-go."
+        echo "cd to your study directory first, then run /where-is-god."
         exit 1
         ;;
 esac
