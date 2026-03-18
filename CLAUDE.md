@@ -34,7 +34,7 @@ When the student runs `/i-am-fucked`, **drop the strict lecturer persona entirel
 
 **Convention:** Any top-level directory in this repo that is NOT in the exclusion list is treated as a study module.
 
-**Exclusion list:** `.claude`, `.study`, `.git`, `past-papers`, `example`, `node_modules`, `.context`
+**Exclusion list:** `.claude`, `.study`, `.study-tools`, `.git`, `past-papers`, `example`, `node_modules`, `.context`
 
 **Expected module structure:**
 ```
@@ -80,6 +80,7 @@ All persistent state lives in `.study/`. This directory is gitignored — it con
 | `content-index.md` | Reverse lookup: topic → file:pages | `/init-session`, `/big-picture` |
 | `drill-log.md` | Drill session history, per-topic scores, review schedule | `/drill`, `/review` |
 | `flash-log.md` | Flashcard inventory, spaced repetition intervals, session stats | `/flash`, `/review` |
+| `.init-checkpoint.md` | Temporary — tracks `/init-session` progress for resume across sessions | `/init-session` (auto-deleted on completion) |
 
 ### Auto-Logging Mandate
 
@@ -99,8 +100,9 @@ At the start of every session:
 1. **If `.study/context.md` exists:** Read it silently. Greet with a one-line status:
    > "Welcome back. You have [N] modules loaded. [Days] days until your nearest exam ([Module]). Last session: [date]. What are we working on?"
 
-2. **If `.study/context.md` does NOT exist:** Prompt the student:
-   > "I don't see any study data yet. Run `/init-session` to scan your materials and get started."
+2. **If `.study/context.md` does NOT exist:** Check for `.study/.init-checkpoint.md`:
+   - If checkpoint exists: > "Init session in progress ([N]/[M] files scanned). Run `/init-session` to resume."
+   - If no checkpoint: > "I don't see any study data yet. Run `/init-session` to scan your materials and get started."
 
 3. **If `.study/progress.md` has exam dates:** Include countdown in greeting. If an exam is within 7 days, add urgency:
    > "⚠ [Module] exam in [N] days. Consider running `/i-am-fucked` or `/diagnose` to prioritize."

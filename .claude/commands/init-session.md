@@ -1,28 +1,103 @@
-Bootstrap study session — scan all materials, detect modules, and set exam dates.
+Bootstrap study session — scan all materials, detect modules, and set exam dates. Supports **resume across sessions** via checkpoint — if scanning is interrupted (session limit, context overflow), run `/init-session` again to pick up where you left off.
 
 ## Instructions
 
-You are initializing a study session. Follow these steps precisely:
+You are initializing a study session. Follow these steps precisely.
 
-### Step 1: Detect Modules
+### Step 0: Check for Checkpoint
 
-Scan the top-level directories in the repository root. Any directory NOT in the exclusion list (`.claude`, `.study`, `.git`, `past-papers`, `example`, `node_modules`, `.context`) is a study module.
+Read `.study/.init-checkpoint.md`. If it exists:
 
-For each module found, list:
-- Module name (directory name)
-- Subdirectories (weeks, past-papers, etc.)
-- All files with their types
+1. Parse the frontmatter for `status`, `total_files`, and `processed` count
+2. Print resume status:
+   ```
+   Init session in progress — [processed]/[total_files] files scanned.
+   Continue scanning, or restart from scratch? [continue/restart]
+   ```
+3. If the student says **continue** (or just presses enter / says yes): skip to Step 2 (resume scanning from unprocessed files)
+4. If the student says **restart**: delete `.study/.init-checkpoint.md`, then continue to Step 1
 
-### Step 2: Scan Materials
+If the checkpoint does not exist, continue to Step 1.
 
-For each module, recursively find all files:
+### Step 1: Detect Modules & Build File Inventory
+
+Scan the top-level directories in the repository root. Any directory NOT in the exclusion list (`.claude`, `.study`, `.study-tools`, `.git`, `past-papers`, `example`, `node_modules`, `.context`) is a study module.
+
+For each module found, recursively find all files:
 - **Readable:** `.pdf`, `.md`, `.txt`, `.png`, `.jpg`, `.jpeg`
 - **Unreadable (flag):** `.pptx`, `.docx`, `.xlsx` — warn the student to convert these to PDF
 
-For each readable file:
-- Read the content (for PDFs over 100 pages, read 20 pages at a time)
-- Extract key topics, equations, definitions, and concepts
-- Note which week/section it belongs to
+Write the initial checkpoint `.study/.init-checkpoint.md`:
+
+```markdown
+---
+status: scanning
+started: YYYY-MM-DD
+last_updated: YYYY-MM-DDTHH:MM:SS
+total_files: N
+processed: 0
+---
+
+# Init Checkpoint
+
+## Modules
+
+### [Module Name]
+- **Path:** /absolute/path/to/module
+- **Subdirectories:** week-01, week-02, labs, ...
+
+## File Inventory
+
+- [ ] relative/path/to/file1.pdf
+- [ ] relative/path/to/file2.pdf
+- [ ] relative/path/to/notes.md
+...
+
+## Processed File Data
+
+<!-- file-map entries appended here as files are scanned -->
+
+## Exam Dates
+
+<!-- filled in Step 5 -->
+
+## Warnings
+
+- [any unreadable files that need conversion]
+```
+
+### Step 2: Scan Materials (Batched + Checkpointed)
+
+Process files in **batches of ~10 files**. For each batch:
+
+1. Take the next ~10 unchecked (`[ ]`) files from the File Inventory
+2. For each file in the batch:
+   - Read the content (for PDFs over 100 pages, read 20 pages at a time)
+   - Extract key topics, equations, definitions, and concepts
+   - Identify topic-coherent page ranges (2-15 pages each) based on heading changes, new theorem/definition introductions, and subject shifts
+   - For markdown/text files: use H2/H3 section headings as the unit instead of pages
+3. After completing the batch, update `.study/.init-checkpoint.md`:
+   - Mark each processed file as `[x]` in the File Inventory
+   - Update `processed` count and `last_updated` in frontmatter
+   - Append file-map entries to the **Processed File Data** section, one per file:
+
+   ```markdown
+   ### [relative/path/to/file.pdf]
+   - **Pages:** N | **Type:** lecture slides
+
+   | Pages | Topics | Key Content |
+   |-------|--------|-------------|
+   | 1-3 | Course overview | Syllabus, grading |
+   | 4-11 | Basic circuit elements | Resistors, capacitors, inductors |
+   ```
+
+4. Print batch progress:
+   ```
+   Scanned [processed]/[total_files] files ([percentage]%). Safe to stop and resume with /init-session.
+   ```
+5. Continue to next batch. Repeat until all files are processed.
+
+When all files are processed, proceed to Step 3.
 
 ### Step 3: Detect Changes (if `.study/context.md` already exists)
 
@@ -47,6 +122,8 @@ If `.study/progress.md` does NOT exist or has no exam dates:
 - Calculate days remaining for each exam
 - If the student doesn't know a date, store as "TBD"
 
+Update the checkpoint's Exam Dates section with the dates.
+
 ### Step 6: Generate/Update `.study/context.md`
 
 First, ensure all `.study/` subdirectories exist:
@@ -55,7 +132,7 @@ mkdir -p .study/rendered
 mkdir -p .study/mock-exams
 ```
 
-Create or update `.study/context.md` with this structure:
+Create or update `.study/context.md` using data from the checkpoint's Modules, File Inventory, and Processed File Data sections:
 
 ```markdown
 ---
@@ -93,13 +170,7 @@ total_files: N
 
 ### Step 6b: Generate `.study/file-map.md`
 
-Using the content already read during Step 2 (do NOT re-read any files), build a forward index mapping each file to its topics at page-level granularity:
-
-- For PDFs: identify topic-coherent page ranges (2-15 pages each) based on heading changes, new theorem/definition introductions, and subject shifts observed during the Step 2 scan
-- For markdown/text files: use H2/H3 section headings as the unit instead of pages
-- Record the file type and total page/section count
-
-Write `.study/file-map.md` with this structure:
+Using the Processed File Data from the checkpoint (do NOT re-read any source files), write `.study/file-map.md`:
 
 ```markdown
 ---
@@ -199,7 +270,11 @@ total_questions: 0
 
 If it already exists, update `last_session`, increment `total_sessions`, recalculate days remaining, and add a session log entry.
 
-### Step 8: Print Terminal Summary
+### Step 8: Cleanup
+
+Delete `.study/.init-checkpoint.md` — all data has been persisted to final state files.
+
+### Step 9: Print Terminal Summary
 
 Print a clean summary to the terminal:
 

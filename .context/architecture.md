@@ -21,6 +21,23 @@ The highest-impact optimization. Two complementary indexes enable targeted reads
 
 ---
 
+## Checkpoint/Resume Pattern
+
+`/init-session` can span multiple sessions via `.study/.init-checkpoint.md`. This lets Pro-tier users (limited messages) bootstrap large courses without losing progress.
+
+**Flow:**
+```
+Session 1: /init-session → scans 30/97 files → checkpoint saved → session limit hit
+Session 2: /init-session → reads checkpoint → resumes from file 31 → scans to 70 → stop
+Session 3: /init-session → resumes from file 71 → completes → generates state files → deletes checkpoint
+```
+
+**Checkpoint stores:** module list, full file inventory (checked/unchecked), per-file topic+page data (file-map format), exam dates. When all files are processed, final state files (`context.md`, `file-map.md`, `content-index.md`, `progress.md`) are generated from the checkpoint in one pass, then the checkpoint is deleted.
+
+**Other commands still work** while a checkpoint exists — they use fallback logic (full material scans) since index files haven't been generated yet.
+
+---
+
 ## Command Dependency Graph
 
 ```
