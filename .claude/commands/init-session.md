@@ -8,10 +8,11 @@ You are initializing a study session. Follow these steps precisely.
 
 Read `.study/.init-checkpoint.md`. If it exists:
 
-1. Parse the frontmatter for `status`, `total_files`, and `processed` count
+1. Parse the frontmatter for `status`, `total_files`, `total_pages`, `processed`, and `pages_processed`
 2. Print resume status:
    ```
-   Init session in progress — [processed]/[total_files] files scanned.
+   Init session in progress — [processed]/[total_files] files, [pages_processed]/[total_pages] pages ([page_%]%).
+   Est. tokens remaining: ~[remaining_pages × 1500 / 1000]K
    Continue scanning, or restart from scratch? [continue/restart]
    ```
 3. If the student says **continue** (or just presses enter / says yes): skip to Step 2 (resume scanning from unprocessed files)
@@ -27,6 +28,12 @@ For each module found, recursively find all files:
 - **Readable:** `.pdf`, `.md`, `.txt`, `.png`, `.jpg`, `.jpeg`
 - **Unreadable (flag):** `.pptx`, `.docx`, `.xlsx` — warn the student to convert these to PDF
 
+**Count PDF pages** (for progress tracking). Run this bash command:
+```bash
+find . -name "*.pdf" ! -path "./.study/*" ! -path "./.claude/*" -exec mdls -name kMDItemNumberOfPages -raw {} \; -print 2>/dev/null
+```
+This outputs `page_count\nfilepath` pairs. Parse the output to get per-file page counts. If `mdls` returns `(null)` for a file, estimate 20 pages. For non-PDF files (`.md`, `.txt`), count as 1 page each. Sum all page counts to get `total_pages`.
+
 Write the initial checkpoint `.study/.init-checkpoint.md`:
 
 ```markdown
@@ -35,7 +42,9 @@ status: scanning
 started: YYYY-MM-DD
 last_updated: YYYY-MM-DDTHH:MM:SS
 total_files: N
+total_pages: N
 processed: 0
+pages_processed: 0
 ---
 
 # Init Checkpoint
@@ -48,9 +57,9 @@ processed: 0
 
 ## File Inventory
 
-- [ ] relative/path/to/file1.pdf
-- [ ] relative/path/to/file2.pdf
-- [ ] relative/path/to/notes.md
+- [ ] relative/path/to/file1.pdf (24p)
+- [ ] relative/path/to/file2.pdf (30p)
+- [ ] relative/path/to/notes.md (1p)
 ...
 
 ## Processed File Data
@@ -78,7 +87,7 @@ Process files in **batches of ~10 files**. For each batch:
    - For markdown/text files: use H2/H3 section headings as the unit instead of pages
 3. After completing the batch, update `.study/.init-checkpoint.md`:
    - Mark each processed file as `[x]` in the File Inventory
-   - Update `processed` count and `last_updated` in frontmatter
+   - Update `processed`, `pages_processed`, and `last_updated` in frontmatter
    - Append file-map entries to the **Processed File Data** section, one per file:
 
    ```markdown
@@ -91,10 +100,17 @@ Process files in **batches of ~10 files**. For each batch:
    | 4-11 | Basic circuit elements | Resistors, capacitors, inductors |
    ```
 
-4. Print batch progress:
+4. Print batch progress with page-based metrics:
    ```
-   Scanned [processed]/[total_files] files ([percentage]%). Safe to stop and resume with /init-session.
+   ━━━ Batch N complete ━━━
+   Files:  [processed]/[total_files]
+   Pages:  [pages_processed]/[total_pages]  ([page_percentage]%)
+   Est. tokens remaining: ~[remaining_pages × 1500 / 1000]K
+   ━━━━━━━━━━━━━━━━━━━━━━━
+   Safe to stop and resume with /init-session.
    ```
+   Token estimate: ~1.5K tokens per PDF page (average for lecture slides). This helps students gauge how many sessions they'll need.
+
 5. Continue to next batch. Repeat until all files are processed.
 
 When all files are processed, proceed to Step 3.
