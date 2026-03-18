@@ -108,6 +108,16 @@ cp "$SOURCE_ROOT/.study-tools/template.html" .study-tools/template.html
 chmod +x .study-tools/render.sh
 echo "  [ok] .study-tools/render.sh + template.html"
 
+# --- Copy .context/ ---
+
+if [ -d "$SOURCE_ROOT/.context" ]; then
+    mkdir -p .context
+    for ctx_file in "$SOURCE_ROOT"/.context/*.md; do
+        [ -f "$ctx_file" ] && cp "$ctx_file" ".context/$(basename "$ctx_file")"
+    done
+    echo "  [ok] .context/ architecture docs"
+fi
+
 # --- Handle CLAUDE.md ---
 
 if [ "$CLAUDEMD_STATUS" = "none" ]; then
