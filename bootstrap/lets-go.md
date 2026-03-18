@@ -1,9 +1,9 @@
-# /where-is-god — Bootstrap study-with-claude
+# /lets-go — Bootstrap study-with-claude
 
 Run the bootstrap script:
 
 ```bash
-bash "$(dirname "$(readlink "$HOME/.claude/commands/where-is-god.md")")/setup.sh"
+bash "$(dirname "$(readlink "$HOME/.claude/commands/lets-go.md")")/setup.sh"
 ```
 
 After the script finishes, check its output for two special cases that need your help:
