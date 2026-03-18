@@ -46,10 +46,11 @@ symlink_file() {
     echo "  [ok] $LABEL symlinked"
 }
 
-# --- Symlink where-is-god command ---
+# --- Symlink bootstrap commands ---
 
-echo "Bootstrap command:"
+echo "Bootstrap commands:"
 symlink_file "$SCRIPT_DIR/bootstrap/where-is-god.md" "$COMMANDS_DIR/where-is-god.md" "commands/where-is-god.md"
+symlink_file "$SCRIPT_DIR/bootstrap/update-thunder.md" "$COMMANDS_DIR/update-thunder.md" "commands/update-thunder.md"
 echo ""
 
 # --- Summary ---
@@ -58,7 +59,9 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "  Installation complete!"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "The /where-is-god command is now available globally."
+echo "Global commands installed:"
+echo "  /where-is-god     — bootstrap study system in any directory"
+echo "  /update-thunder    — pull latest + update current directory"
 echo ""
 echo "Usage:"
 echo "  cd ~/your-study-folder"
