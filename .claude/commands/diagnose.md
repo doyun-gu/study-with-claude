@@ -10,6 +10,8 @@ Load every available `.study/` file:
 - `progress.md` — coverage metrics and exam dates
 - `past-paper-analysis.md` — exam topic frequencies
 - `big-picture.md` — concept inventory
+- `drill-log.md` — drill scores, review schedule
+- `flash-log.md` — flashcard performance, ease factors
 
 If some files don't exist, work with what's available. Note what's missing and recommend the student run the relevant commands.
 
@@ -30,6 +32,16 @@ Look for these indicators:
 **From Past Paper Analysis (if available):**
 - **High-frequency exam topics not yet studied**: Critical gap
 - **Banker questions the student hasn't practiced**: Missed easy marks
+
+**From Drill Log (if available):**
+- **Low drill scores**: Topics scored 0 or 1 in recent drills → not understood
+- **Frequently drilled but still failing**: Topics drilled multiple times with no score improvement
+- **Overdue drill reviews**: Topics past their next review date
+
+**From Flash Log (if available):**
+- **Low ease cards**: Cards with ease factor < 1.8 → repeatedly forgotten
+- **High wrong-rating frequency**: Cards rated 1 (wrong) more than twice
+- **Overdue flashcards**: Cards past their next review date, especially if also low ease
 
 **From Context:**
 - **Unread materials**: Files that exist but topics haven't been asked about

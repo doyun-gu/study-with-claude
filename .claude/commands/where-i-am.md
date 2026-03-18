@@ -19,6 +19,8 @@ Read:
 - `.study/context.md` — total topics per module
 - `.study/qna-log.md` — question count and topics asked about
 - `.study/diagnosis.md` — weak areas (if exists)
+- `.study/drill-log.md` — drill scores and review schedule (if exists)
+- `.study/flash-log.md` — flashcard intervals and due dates (if exists)
 
 If `.study/progress.md` doesn't exist, create it with defaults and note that `/init-session` should be run.
 
@@ -30,6 +32,12 @@ If `.study/progress.md` doesn't exist, create it with defaults and note that `/i
 - Weak areas count (from diagnosis.md)
 - Days until exam
 - Topics per day needed to finish (remaining topics ÷ days left)
+
+**Review metrics (from drill-log.md and flash-log.md):**
+- Review streak: consecutive days with completed reviews (from progress.md)
+- Cards due today: flashcards with `next_review` ≤ today (from flash-log.md)
+- Drill score trend: average score of last 3 drill sessions (from drill-log.md)
+- Overdue items: total overdue flashcards + drill topics
 
 **Overall metrics:**
 - Total sessions (from progress.md session log)
@@ -60,6 +68,11 @@ Print an ASCII dashboard to the terminal:
 ║  Sessions: 12 | Total questions: 37                  ║
 ║  Since: 2024-05-01 (45 days)                         ║
 ║  Avg: 3.1 questions/session                          ║
+╠══════════════════════════════════════════════════════╣
+║  REVIEW STATUS                                       ║
+║  Streak: N days | Cards due: N | Drills due: N      ║
+║  Drill trend (last 3): N% avg                        ║
+║  Overdue: N items                                     ║
 ╠══════════════════════════════════════════════════════╣
 ║  TODAY'S RECOMMENDED FOCUS                           ║
 ║  1. EE301: Review Thevenin's theorem (weak area)    ║

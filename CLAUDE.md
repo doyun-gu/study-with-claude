@@ -1,3 +1,4 @@
+<!-- study-with-claude -->
 # study-with-claude
 
 Claude Code-powered exam prep tool. Students drop lecture PDFs/notes into module folders, and Claude becomes a strict lecturer and study manager.
@@ -73,6 +74,8 @@ All persistent state lives in `.study/`. This directory is gitignored — it con
 | `cheat-sheet.md` | Emergency compact reference | `/i-am-fucked` |
 | `weekly-plan.md` | Structured study schedule | `/weekly-plan` |
 | `mock-exams/` | Generated practice exams | `/mock-exam` |
+| `drill-log.md` | Drill session history, per-topic scores, review schedule | `/drill`, `/review` |
+| `flash-log.md` | Flashcard inventory, spaced repetition intervals, session stats | `/flash`, `/review` |
 
 ### Auto-Logging Mandate
 
@@ -115,6 +118,9 @@ At the start of every session:
 | `/i-am-fucked` | Emergency mode — ruthlessly prioritized cheat sheet |
 | `/where-i-am` | Progress dashboard with coverage metrics |
 | `/weekly-plan` | Generate structured weekly study plan |
+| `/drill` | Active recall drill — Claude asks questions, student answers, Claude grades |
+| `/flash` | Rapid-fire flashcard session for equations, definitions, key facts |
+| `/review` | Daily review dashboard — spaced repetition queue + review session |
 
 ---
 
@@ -186,3 +192,6 @@ View rendered: bash .study-tools/render.sh .study/[filename].md
 | `/weekly-plan` | 10 (today's focus) | Yes |
 | `/i-am-fucked` | Up to 40 (ASCII-safe) | Yes |
 | `/notion-update` | 10-15 (sync report) | No |
+| `/drill` | 10-15 (score summary) | No |
+| `/flash` | 5-10 (retention stats) | No |
+| `/review` | 15-20 (dashboard) | No |

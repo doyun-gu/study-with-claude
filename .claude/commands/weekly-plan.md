@@ -70,6 +70,9 @@ modules: [list]
 - [ ] **[Topic]** — New material: [week-NN/file.pdf]
 - [ ] Summarize key equations (use `/big-picture` to verify)
 
+### Start of Day (10-15 min)
+- [ ] Run `/review` to clear your spaced repetition queue
+
 ### Evening Review (30 min)
 - [ ] Quick review of today's topics — use `/why` for any unclear points
 

@@ -4,13 +4,33 @@ Turn Claude Code into your personal exam prep lecturer. Drop your lecture PDFs a
 
 All study data stays local on your machine. No accounts, no servers, no subscriptions beyond Claude Code.
 
+## Install (Recommended)
+
+Install once, then use `/where-is-god` to bootstrap any directory:
+
+```bash
+# One-time setup — makes /where-is-god available everywhere
+git clone https://github.com/yourusername/study-with-claude.git ~/study-with-claude
+cd ~/study-with-claude && bash install.sh
+
+# Then in any directory with your study materials:
+cd ~/my-courses
+claude
+/where-is-god     # bootstraps everything — copies commands, tools, CLAUDE.md
+/init-session     # scan your materials and start studying
+```
+
+No need to clone the repo into every study folder. Your materials stay where they are.
+
+---
+
 ## Requirements
 
 - [Claude Code](https://docs.anthropic.com/en/docs/claude-code) installed and configured
 - Your lecture materials (PDFs, markdown notes, images)
 - Past exam papers (optional but highly recommended)
 
-## Quick Start
+## Quick Start (Alternative: Clone Method)
 
 ```bash
 # Clone the template
@@ -45,6 +65,9 @@ Claude will scan your materials, ask for your exam dates, and you're ready to go
 | `/diagnose` | Find your weak areas, knowledge gaps, and study priorities |
 | `/big-picture` | Extract every equation, definition, and theorem from your materials |
 | `/mock-exam [module] [difficulty]` | Generate a practice exam matching past paper style |
+| `/drill [topic]` | Active recall drill — Claude asks questions, you answer, Claude grades |
+| `/flash [module]` | Rapid-fire flashcard session for equations, definitions, key facts |
+| `/review` | Daily review dashboard — clears your spaced repetition queue |
 | `/where-i-am` | Progress dashboard with coverage metrics and exam countdown |
 | `/weekly-plan` | Generate a structured 7-day study plan |
 | `/timer [hours]` | Set a study timer with audio alert (e.g., `/timer 2`) |
@@ -113,8 +136,11 @@ If you don't know an exam date yet, enter "TBD" — you can update it later by e
 3. **Run `/past-papers` early** — frequency analysis dramatically improves study prioritization.
 4. **Check `/where-i-am` regularly** — stay aware of your coverage and pace.
 5. **Run `/diagnose` weekly** — identifies gaps before they become problems.
-6. **Use `/mock-exam` for practice** — the interactive grading mode gives real feedback.
-7. **Don't skip the strict lecturer feedback** — being corrected is how you learn.
+6. **Start each session with `/review`** — clears your spaced repetition queue and keeps knowledge fresh.
+7. **Use `/drill` after learning** — active recall right after studying is the most effective way to retain.
+8. **Run `/flash` for memorization** — lock in equations and definitions with spaced repetition.
+9. **Use `/mock-exam` for practice** — the interactive grading mode gives real feedback.
+10. **Don't skip the strict lecturer feedback** — being corrected is how you learn.
 
 ## Viewing Rich Content
 
@@ -156,6 +182,8 @@ All your study data is stored locally in the `.study/` directory, which is gitig
 ├── diagnosis.md           # Weak areas
 ├── cheat-sheet.md         # Emergency reference
 ├── weekly-plan.md         # Study schedule
+├── drill-log.md           # Drill scores and review schedule
+├── flash-log.md           # Flashcard inventory and spaced repetition
 └── mock-exams/            # Practice exams
 ```
 
@@ -180,9 +208,10 @@ Session 1:
   /diagnose              → Identifies initial gaps
 
 Session 2+:
-  /init-session          → Detects new materials, updates state
+  /review                → Clear today's spaced repetition queue (5-15 min)
   /why [question]        → Study specific topics
-  /why [question]        → Build up Q&A log
+  /drill [topic]         → Test understanding of what you just learned
+  /flash                 → Lock in equations and definitions
   /where-i-am            → Check progress
 
 Weekly:
@@ -199,8 +228,6 @@ Before exam:
 Contributions welcome. Some ideas:
 
 - Support for additional file formats
-- Flashcard generation command
-- Spaced repetition tracking
 - Group study features
 - Export to Anki
 
