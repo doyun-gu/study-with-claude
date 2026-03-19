@@ -1,0 +1,27 @@
+# study-with-claude daemon configuration
+# Copy this to ~/.study-daemon/config and edit for your setup
+
+# Study directory (where your modules and .study/ live)
+STUDY_DIR="$HOME/study"
+
+# Claude Code binary (usually auto-detected)
+# CLAUDE_BIN="$HOME/.local/bin/claude"
+
+# --- Remote Worker (Optional) ---
+# If you have a second machine (e.g. Mac Mini, server) that's always on,
+# heavy tasks can be dispatched there while you keep chatting on Desktop.
+# Leave commented out to run everything locally.
+
+# REMOTE_HOST="my-worker"           # SSH alias from ~/.ssh/config
+# REMOTE_STUDY_DIR="$HOME/study"    # Path on the remote machine
+# REMOTE_CLAUDE="$HOME/.local/bin/claude"
+# REMOTE_DOCS="$HOME/Documents"     # Where lecture materials live on remote
+
+# --- Scheduling ---
+# Daily review time (24h format)
+DAILY_REVIEW_HOUR=8
+DAILY_REVIEW_MINUTE=0
+
+# --- Polling ---
+POLL_INTERVAL=5          # seconds between checking for new tasks
+COLLECT_INTERVAL=30      # seconds between checking remote for completed tasks

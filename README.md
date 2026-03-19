@@ -1,235 +1,353 @@
 # study-with-claude
 
-Turn Claude Code into your personal exam prep lecturer. Drop your lecture PDFs and notes into module folders, and Claude becomes a strict-but-fair tutor that tracks your progress, analyzes past papers, diagnoses weak areas, and generates practice exams.
+Turn Claude into your personal exam prep system. Drop your lecture PDFs and notes into module folders, and Claude becomes a strict-but-fair tutor that tracks your progress, analyzes past papers, diagnoses weak areas, and generates practice exams.
 
-All study data stays local on your machine. No accounts, no servers, no subscriptions beyond Claude Code.
+**V2: Now works with Claude Desktop + Claude Code together.** Claude Desktop is your conversational tutor. Claude Code is the engine that runs heavy analysis in the background.
 
-## Install (Recommended)
-
-Install once, then use `/where-is-god` to bootstrap any directory:
-
-```bash
-# One-time setup — makes /where-is-god available everywhere
-git clone https://github.com/yourusername/study-with-claude.git ~/study-with-claude
-cd ~/study-with-claude && bash install.sh
-
-# Then in any directory with your study materials:
-cd ~/my-courses
-claude
-/where-is-god     # bootstraps everything — copies commands, tools, CLAUDE.md
-/init-session     # scan your materials and start studying
-```
-
-No need to clone the repo into every study folder. Your materials stay where they are.
+All study data stays local on your machine.
 
 ---
 
-## Requirements
+## How It Works
 
-- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) installed and configured
+```
+┌─────────────────────────────────────┐
+│       Claude Desktop (tutor)         │
+│  "Explain buck converters"          │
+│  "Analyze my past papers"           │
+│  "What are my weak areas?"          │
+└───────────┬────────────┬────────────┘
+            │ logs Q&A   │ creates task
+            ▼            ▼
+     .study/qna-log  .study/tasks/pending/
+            │            │
+            │     ┌──────▼──────────────┐
+            │     │   Study Daemon       │
+            │     │   (background)       │
+            │     │                      │
+            │     │   Worker online?     │
+            │     │   ├─ Yes → dispatch  │
+            │     │   └─ No  → local     │
+            │     └──────┬──────────────┘
+            │            │
+            │     ┌──────▼──────────────┐
+            │     │   Claude Code        │
+            │     │   /init-session      │
+            │     │   /past-papers       │
+            │     │   /diagnose          │
+            │     │   /drill /flash      │
+            │     └──────┬──────────────┘
+            │            │
+            ▼            ▼
+     ┌───────────────────────────┐
+     │    .study/ state files     │
+     │    (source of truth)       │
+     └───────────────────────────┘
+```
+
+**Claude Desktop** answers your questions conversationally, logs every Q&A, and delegates heavy tasks (past paper analysis, diagnostics, material scanning) to Claude Code.
+
+**Claude Code** runs in the background via the daemon, processing tasks and updating state files that Desktop reads.
+
+**The daemon** bridges them — watches for task files, dispatches to Claude Code (locally or on a remote worker), and syncs results.
+
+---
+
+## Install
+
+### Requirements
+
+- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) installed
+- [Claude Desktop](https://claude.ai/download) (optional but recommended)
+- Node.js (for Claude Desktop MCP integration)
 - Your lecture materials (PDFs, markdown notes, images)
-- Past exam papers (optional but highly recommended)
 
-## Quick Start (Alternative: Clone Method)
+### Quick Start
 
 ```bash
-# Clone the template
-git clone https://github.com/yourusername/study-with-claude.git
-cd study-with-claude
+# Clone and install
+git clone https://github.com/doyun-gu/study-with-claude.git ~/study-with-claude
+cd ~/study-with-claude && bash install.sh
+```
 
-# Create your first module folder
-mkdir -p EE301-Circuits/week-01
+The installer:
+1. Installs `/where-is-god` and `/update-thunder` global commands
+2. Sets up the background daemon and task queue
+3. Configures Claude Desktop's filesystem MCP server (if Desktop is installed)
+4. Generates a `desktop-instructions.md` template for your Claude Desktop Project
+5. Creates launchd services (macOS) for the daemon, daily review, and wake recovery
 
-# Add your lecture materials
-cp ~/Downloads/week1-slides.pdf EE301-Circuits/week-01/
+### Set Up Your Study Directory
 
-# Add past papers (optional)
-cp ~/Downloads/2024-exam.pdf EE301-Circuits/past-papers/
+```bash
+# Create workspace and add your modules
+mkdir -p ~/study
+cd ~/study
 
-# Start Claude Code
+# Option A: Symlink existing course folders (recommended)
+ln -s ~/Documents/EE301-Circuits ~/study/EE301-Circuits
+ln -s ~/Documents/MATH201-Linear-Algebra ~/study/MATH201-Linear-Algebra
+
+# Option B: Copy materials directly
+cp -r ~/Downloads/EE301-slides ~/study/EE301-Circuits
+
+# Bootstrap study-with-claude in this directory
 claude
-
-# Initialize your study session
+/where-is-god
 /init-session
 ```
 
-Claude will scan your materials, ask for your exam dates, and you're ready to go.
+### Set Up Claude Desktop
+
+1. **Restart Claude Desktop** after install (to load the filesystem MCP)
+2. Look for **Connectors** in the chat menu — `filesystem` should be toggled on
+3. Create a **Project** in Claude Desktop (e.g., "Study")
+4. Paste the contents of `~/study/desktop-instructions.md` as the project's custom instructions
+5. Start chatting in that project — ask about your course materials
+
+---
+
+## Architecture
+
+### File Structure
+
+```
+~/study/                          # Your study workspace
+├── CLAUDE.md                     # Study system instructions
+├── .claude/commands/             # 14 slash commands for Claude Code
+├── .study/                       # All persistent state (gitignored)
+│   ├── context.md                # Module inventory
+│   ├── content-index.md          # Topic → file:pages (reverse index)
+│   ├── file-map.md               # File → topics (forward index)
+│   ├── progress.md               # Coverage metrics, exam dates
+│   ├── qna-log.md                # All Q&A history (Desktop + Code)
+│   ├── big-picture.md            # Equations, definitions, concepts
+│   ├── diagnosis.md              # Weak areas analysis
+│   ├── past-paper-analysis.md    # Exam frequency matrix
+│   ├── drill-log.md              # Drill scores, review schedule
+│   ├── flash-log.md              # Flashcard spaced repetition
+│   ├── daily-summary.md          # Auto-generated morning summary
+│   ├── cheat-sheet.md            # Emergency reference
+│   ├── weekly-plan.md            # Study schedule
+│   ├── mock-exams/               # Generated practice exams
+│   └── tasks/                    # Task queue
+│       ├── pending/              # Desktop creates tasks here
+│       ├── running/              # Daemon moves tasks here
+│       └── done/                 # Completed tasks with output
+├── .study-daemon/                # Background daemon
+│   ├── study-daemon.sh           # Main daemon (watches tasks)
+│   ├── daily-review.sh           # Scheduled daily review
+│   ├── on-wake.sh                # Wake recovery
+│   └── ctl.sh                    # Control script
+├── .study-tools/                 # Rendering pipeline
+│   ├── render.sh                 # Markdown → HTML with LaTeX
+│   └── template.html             # Browser template
+├── EE301-Circuits/               # Module (or symlink)
+│   ├── week-01/
+│   │   └── slides.pdf
+│   └── past-papers/
+│       └── 2024-exam.pdf
+└── MATH201-Linear-Algebra/       # Another module
+```
+
+### Token-Efficient Content Lookup
+
+The system builds two indexes when you run `/init-session`:
+
+- **`file-map.md`** (forward index): maps each file to topic-coherent page ranges
+- **`content-index.md`** (reverse index): maps each topic to specific file:page locations
+
+When you ask a question, Claude reads the index first (small file) to find exactly which pages to read, instead of scanning entire PDFs. This dramatically reduces token usage and response time.
+
+### Task Queue
+
+Claude Desktop delegates heavy work by creating task files:
+
+```
+.study/tasks/pending/2024-03-19-143022-past-papers.task.md
+```
+
+The daemon picks this up, runs Claude Code with the appropriate command, and writes results to `.study/` state files. Claude Desktop reads those files for its next answer.
+
+### Spaced Repetition
+
+Four commands form a feedback loop:
+
+1. **`/drill`** — generates questions, grades answers, tracks with SM-2 intervals
+2. **`/flash`** — rapid-fire flashcards from big-picture.md
+3. **`/review`** — daily dispatcher surfacing items where `next_review ≤ today`
+4. **`/diagnose`** — reads both logs as weakness signals
+
+---
 
 ## Commands
 
+### Claude Code (terminal)
+
 | Command | What It Does |
 |---------|-------------|
-| `/init-session` | Scan materials, detect modules, set exam dates, bootstrap study state |
-| `/why [question]` | Ask anything — get a direct, sourced answer with equations and citations |
-| `/past-papers` | Analyze past exams, build a frequency matrix of tested topics |
-| `/diagnose` | Find your weak areas, knowledge gaps, and study priorities |
-| `/big-picture` | Extract every equation, definition, and theorem from your materials |
-| `/mock-exam [module] [difficulty]` | Generate a practice exam matching past paper style |
-| `/drill [topic]` | Active recall drill — Claude asks questions, you answer, Claude grades |
-| `/flash [module]` | Rapid-fire flashcard session for equations, definitions, key facts |
-| `/review` | Daily review dashboard — clears your spaced repetition queue |
-| `/where-i-am` | Progress dashboard with coverage metrics and exam countdown |
-| `/weekly-plan` | Generate a structured 7-day study plan |
-| `/timer [hours]` | Set a study timer with audio alert (e.g., `/timer 2`) |
-| `/i-am-fucked` | Emergency mode — ruthlessly prioritized cheat sheet for last-minute cramming |
-| `/notion-update` | Sync study state to Notion (optional, requires Notion MCP) |
+| `/init-session` | Scan materials, detect modules, set exam dates, build indexes |
+| `/why [question]` | Direct Q&A with sourced answers and equations |
+| `/past-papers` | Analyze past exams, build frequency matrix |
+| `/diagnose` | Find weak areas, knowledge gaps, study priorities |
+| `/big-picture` | Extract every equation, definition, theorem |
+| `/mock-exam` | Generate practice exam matching past paper style |
+| `/drill [topic]` | Active recall — Claude asks, you answer, Claude grades |
+| `/flash [module]` | Rapid-fire flashcards with spaced repetition |
+| `/review` | Daily review — clears spaced repetition queue |
+| `/where-i-am` | Progress dashboard with coverage and countdown |
+| `/weekly-plan` | Structured 7-day study plan |
+| `/timer [hours]` | Study timer with audio alert |
+| `/i-am-fucked` | Emergency cheat sheet — ruthlessly prioritized |
+| `/notion-update` | Sync to Notion (optional) |
 
-## How to Organize Your Materials
+### Claude Desktop (conversational)
 
-### Module Folders
+Ask naturally — Desktop reads your indexed state files and answers from your actual materials:
 
-Any top-level folder in this repo (except `.claude`, `.git`, `.study`, `past-papers`, `example`) is treated as a study module.
+- *"Explain how a buck converter works"*
+- *"What are my weak areas in Power Electronics?"*
+- *"Analyze my past papers"* → delegates to Claude Code
+- *"Quiz me on SVM"* → runs drill session directly
+- *"What should I study today?"* → reads daily summary
 
-```
-study-with-claude/
-├── EE301-Circuits/              # Module 1
-│   ├── week-01/
-│   │   ├── slides.pdf
-│   │   └── notes.md
-│   ├── week-02/
-│   │   └── lecture.pdf
-│   └── past-papers/
-│       ├── 2023-exam.pdf
-│       └── 2024-exam.pdf
-├── MATH201-Linear-Algebra/      # Module 2
-│   ├── week-01/
-│   │   └── chapter1.pdf
-│   └── past-papers/
-│       └── 2024-final.pdf
-├── past-papers/                 # Cross-module papers go here
-│   └── 2024-combined-exam.pdf
-├── CLAUDE.md
-└── README.md
-```
+Every question is auto-logged to `qna-log.md`, feeding the diagnosis and progress tracking.
 
-### Naming Conventions
+---
 
-- **Modules:** Use any name you want — `EE301-Circuits`, `power-electronics`, `MATH201`. Keep it descriptive.
-- **Weeks:** Use `week-01`, `week-02`, etc. for Claude to detect the sequence and spot gaps.
-- **Past papers:** Put them in `[module]/past-papers/` or the root `past-papers/` folder.
-
-### Supported File Types
-
-| Type | Support |
-|------|---------|
-| `.pdf` | Full support — Claude reads text and images |
-| `.md` | Full support |
-| `.txt` | Full support |
-| `.png`, `.jpg` | Full support — diagrams, schematics, handwritten notes |
-| `.pptx`, `.docx` | Not supported — convert to PDF first |
-
-## Setting Your Exam Dates
-
-`/init-session` asks for exam dates on first run. These enable:
-
-- Countdown timers in your dashboard
-- Urgency-based prioritization in `/diagnose`
-- Pace calculations in `/where-i-am` ("you need 0.6 topics/day to finish")
-- Emergency alerts when exams are close
-
-If you don't know an exam date yet, enter "TBD" — you can update it later by editing `.study/progress.md`.
-
-## Tips for Best Results
-
-1. **Start with `/init-session`** — everything else depends on it.
-2. **Ask questions with `/why`** — this builds your Q&A log, which feeds into diagnosis and progress tracking.
-3. **Run `/past-papers` early** — frequency analysis dramatically improves study prioritization.
-4. **Check `/where-i-am` regularly** — stay aware of your coverage and pace.
-5. **Run `/diagnose` weekly** — identifies gaps before they become problems.
-6. **Start each session with `/review`** — clears your spaced repetition queue and keeps knowledge fresh.
-7. **Use `/drill` after learning** — active recall right after studying is the most effective way to retain.
-8. **Run `/flash` for memorization** — lock in equations and definitions with spaced repetition.
-9. **Use `/mock-exam` for practice** — the interactive grading mode gives real feedback.
-10. **Don't skip the strict lecturer feedback** — being corrected is how you learn.
-
-## Viewing Rich Content
-
-Equation-heavy commands (`/big-picture`, `/mock-exam`, `/past-papers`, `/weekly-plan`, `/i-am-fucked`) auto-open rendered HTML in your browser with properly typeset LaTeX equations, formatted tables, and styled markdown.
-
-For any `.study/` file, you can manually render it:
+## Daemon Control
 
 ```bash
-bash .study-tools/render.sh .study/big-picture.md
+# Check status
+~/study/.study-daemon/ctl.sh status
+
+# View logs
+~/study/.study-daemon/ctl.sh logs
+
+# Start/stop/restart
+~/study/.study-daemon/ctl.sh start
+~/study/.study-daemon/ctl.sh stop
+~/study/.study-daemon/ctl.sh restart
+
+# Sync state from remote worker
+~/study/.study-daemon/ctl.sh sync
 ```
 
-This creates `.study/rendered/big-picture.html` and opens it in your default browser. Requires an internet connection on first load (MathJax and marked.js load from CDN, then cached by the browser).
+### Background Services (macOS)
 
-The terminal still shows a concise summary for every command — the browser render is for detailed review.
+| Service | What it does | Schedule |
+|---------|-------------|----------|
+| Task daemon | Watches for tasks, dispatches to Claude Code | Always running |
+| Daily review | Runs `/review`, writes `daily-summary.md` | 8:00 AM daily |
+| Wake recovery | Collects remote results, re-queues interrupted tasks | On laptop wake |
 
-## Notion Integration (Optional)
+---
 
-`/notion-update` syncs your study data to Notion, creating a Study Hub with databases for modules, Q&A, and past paper topics. This requires the Notion MCP server to be configured in Claude Code.
+## Remote Worker (Optional)
+
+If you have a second machine (e.g., Mac Mini, home server) that's always on, heavy tasks can run there while you close your laptop.
 
 ### Setup
 
-1. Set up the [Notion MCP server](https://github.com/modelcontextprotocol/servers/tree/main/src/notion) for Claude Code
-2. Connect it to your Notion workspace
-3. Run `/notion-update` — it creates everything automatically
+1. Configure SSH access to your worker: `ssh my-worker` should work without password
+2. Install Claude Code on the worker and run `claude login`
+3. Edit `~/.study-daemon/config`:
 
-The command is fully self-contained. It creates its own "Study Hub" page and databases — no existing Notion structure required.
-
-## Privacy
-
-All your study data is stored locally in the `.study/` directory, which is gitignored. Your lecture materials, exam papers, question history, and progress data never leave your machine (unless you use the Notion sync).
-
-```
-.study/                    # All gitignored
-├── context.md             # Module inventory
-├── qna-log.md             # Your question history
-├── progress.md            # Coverage and exam dates
-├── past-paper-analysis.md # Exam topic frequencies
-├── big-picture.md         # Equations and concepts
-├── diagnosis.md           # Weak areas
-├── cheat-sheet.md         # Emergency reference
-├── weekly-plan.md         # Study schedule
-├── drill-log.md           # Drill scores and review schedule
-├── flash-log.md           # Flashcard inventory and spaced repetition
-└── mock-exams/            # Practice exams
+```bash
+REMOTE_HOST="my-worker"           # SSH alias
+REMOTE_STUDY_DIR="$HOME/study"
+REMOTE_CLAUDE="$HOME/.local/bin/claude"
+REMOTE_DOCS="$HOME/Documents"
 ```
 
-## The Teaching Approach
+4. Restart the daemon: `~/study/.study-daemon/ctl.sh restart`
 
-Claude operates as a **strict but fair lecturer**:
+### How it works
 
-- When you ask questions casually, it'll ask what YOU think first, then correct or confirm
-- `/why` bypasses this — direct answers with full citations
-- Misconceptions are called out immediately
-- Correct reasoning gets brief acknowledgment
-- Everything is sourced back to your specific materials
-- `/i-am-fucked` switches to supportive coach mode — no judgment, just help
+- Daemon checks if the worker is reachable before each task
+- If online: syncs state → dispatches via `nohup` (survives SSH disconnect) → collects results
+- If offline: falls back to running locally
+- When your laptop wakes: `on-wake.sh` collects any completed remote tasks and syncs state
+
+---
+
+## Organizing Your Materials
+
+### Module Structure
+
+Any top-level directory (except `.claude`, `.git`, `.study`, etc.) is a study module:
+
+```
+~/study/
+├── EE301-Circuits/
+│   ├── week-01/
+│   │   └── slides.pdf
+│   ├── week-02/
+│   │   └── lecture.pdf
+│   └── past-papers/
+│       └── 2024-exam.pdf
+├── MATH201-Linear-Algebra/
+│   └── ...
+```
+
+### Using Symlinks
+
+If your materials are in another location (e.g., iCloud, Dropbox, university drive):
+
+```bash
+ln -s ~/Documents/My-Courses/EE301 ~/study/EE301-Circuits
+```
+
+The original files stay where they are. study-with-claude sees them through the symlink.
+
+### Supported Files
+
+| Type | Support |
+|------|---------|
+| `.pdf` | Full — Claude reads text and images |
+| `.md` | Full |
+| `.txt` | Full |
+| `.png`, `.jpg` | Full — diagrams, schematics, handwritten notes |
+| `.pptx`, `.docx` | Not supported — convert to PDF first |
+
+---
 
 ## Example Workflow
 
 ```
-Session 1:
-  /init-session          → Scans materials, sets exam dates
-  /past-papers           → Analyzes past exams
-  /big-picture           → Extracts all equations
-  /diagnose              → Identifies initial gaps
+Session 1 (setup):
+  /init-session       → Scans materials, builds indexes
+  /past-papers        → Analyzes exam patterns
+  /big-picture        → Extracts all equations
 
-Session 2+:
-  /review                → Clear today's spaced repetition queue (5-15 min)
-  /why [question]        → Study specific topics
-  /drill [topic]         → Test understanding of what you just learned
-  /flash                 → Lock in equations and definitions
-  /where-i-am            → Check progress
+Daily (Claude Desktop):
+  "What should I study today?"    → Reads daily summary
+  "Explain [concept]"             → Answers from your materials
+  "Quiz me on [topic]"            → Interactive drill
+  "What are my weak areas?"       → Triggers background diagnosis
 
 Weekly:
-  /weekly-plan           → Plan the week
-  /mock-exam             → Practice under exam conditions
-  /diagnose              → Update weak areas
+  /weekly-plan        → Plan the week
+  /mock-exam          → Practice under exam conditions
+  /diagnose           → Update weak areas
 
 Before exam:
-  /i-am-fucked           → Emergency cheat sheet
+  /i-am-fucked        → Emergency cheat sheet
 ```
+
+---
+
+## Privacy
+
+All data stays local. The `.study/` directory is gitignored. Materials never leave your machine unless you use Notion sync.
+
+## The Teaching Approach
+
+Claude operates as a **strict but fair lecturer** — asks what you think first, corrects misconceptions directly, cites specific sources. `/why` gives direct answers. `/i-am-fucked` switches to supportive coach mode.
 
 ## Contributing
 
-Contributions welcome. Some ideas:
-
-- Support for additional file formats
-- Group study features
-- Export to Anki
+Contributions welcome. Ideas: additional file format support, group study features, Anki export, Linux systemd support.
 
 ## License
 
