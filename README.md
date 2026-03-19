@@ -11,38 +11,38 @@ All study data stays local on your machine.
 ## How It Works
 
 ```
-┌─────────────────────────────────────┐
-│       Claude Desktop (tutor)         │
-│  "Explain buck converters"          │
-│  "Analyze my past papers"           │
-│  "What are my weak areas?"          │
-└───────────┬────────────┬────────────┘
-            │ logs Q&A   │ creates task
-            ▼            ▼
-     .study/qna-log  .study/tasks/pending/
-            │            │
-            │     ┌──────▼──────────────┐
-            │     │   Study Daemon       │
-            │     │   (background)       │
-            │     │                      │
-            │     │   Worker online?     │
-            │     │   ├─ Yes → dispatch  │
-            │     │   └─ No  → local     │
-            │     └──────┬──────────────┘
-            │            │
-            │     ┌──────▼──────────────┐
-            │     │   Claude Code        │
-            │     │   /init-session      │
-            │     │   /past-papers       │
-            │     │   /diagnose          │
-            │     │   /drill /flash      │
-            │     └──────┬──────────────┘
-            │            │
-            ▼            ▼
-     ┌───────────────────────────┐
-     │    .study/ state files     │
-     │    (source of truth)       │
-     └───────────────────────────┘
+┌───────────────────────────────────┐
+│      Claude Desktop (tutor)       │
+│  "Explain buck converters"        │
+│  "Analyze my past papers"         │
+│  "What are my weak areas?"        │
+└──────────┬──────────┬─────────────┘
+           │ logs Q&A │ creates task
+           ▼          ▼
+  .study/qna-log   .study/tasks/pending/
+           │          │
+           │   ┌──────▼────────────────┐
+           │   │    Study Daemon       │
+           │   │    (background)       │
+           │   │                       │
+           │   │    Worker online?     │
+           │   │    ├─ Yes → dispatch  │
+           │   │    └─ No  → local    │
+           │   └──────┬────────────────┘
+           │          │
+           │   ┌──────▼────────────────┐
+           │   │    Claude Code        │
+           │   │    /init-session      │
+           │   │    /past-papers       │
+           │   │    /diagnose          │
+           │   │    /drill /flash      │
+           │   └──────┬────────────────┘
+           │          │
+           ▼          ▼
+  ┌────────────────────────────────┐
+  │     .study/ state files        │
+  │     (source of truth)          │
+  └────────────────────────────────┘
 ```
 
 **Claude Desktop** answers your questions conversationally, logs every Q&A, and delegates heavy tasks (past paper analysis, diagnostics, material scanning) to Claude Code.
