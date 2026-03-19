@@ -55,9 +55,44 @@ symlink_file "$SCRIPT_DIR/bootstrap/where-is-god.md" "$COMMANDS_DIR/where-is-god
 symlink_file "$SCRIPT_DIR/bootstrap/update-thunder.md" "$COMMANDS_DIR/update-thunder.md" "/update-thunder"
 echo ""
 
-# --- 2. Daemon scripts ---
-echo "2. Study daemon:"
-mkdir -p "$STUDY_DIR/.study-daemon" "$STUDY_DIR/.study/tasks/pending" "$STUDY_DIR/.study/tasks/running" "$STUDY_DIR/.study/tasks/done"
+# --- 2. Bootstrap study directory ---
+echo "2. Study workspace ($STUDY_DIR):"
+mkdir -p "$STUDY_DIR/.claude/commands" "$STUDY_DIR/.study/tasks/pending" "$STUDY_DIR/.study/tasks/running" "$STUDY_DIR/.study/tasks/done" "$STUDY_DIR/.study/rendered" "$STUDY_DIR/.study/mock-exams" "$STUDY_DIR/.study-tools" "$STUDY_DIR/.context" "$STUDY_DIR/.study-daemon"
+
+# Copy CLAUDE.md, commands, tools, and architecture docs
+cp "$SCRIPT_DIR/CLAUDE.md" "$STUDY_DIR/CLAUDE.md"
+echo "  [ok] CLAUDE.md"
+
+CMD_COUNT=0
+for cmd_file in "$SCRIPT_DIR"/.claude/commands/*.md; do
+    [ -f "$cmd_file" ] || continue
+    cp "$cmd_file" "$STUDY_DIR/.claude/commands/$(basename "$cmd_file")"
+    CMD_COUNT=$((CMD_COUNT + 1))
+done
+echo "  [ok] $CMD_COUNT slash commands"
+
+cp "$SCRIPT_DIR/.claude/settings.local.json" "$STUDY_DIR/.claude/settings.local.json"
+echo "  [ok] settings.local.json"
+
+cp "$SCRIPT_DIR/.study-tools/render.sh" "$STUDY_DIR/.study-tools/render.sh"
+cp "$SCRIPT_DIR/.study-tools/template.html" "$STUDY_DIR/.study-tools/template.html"
+chmod +x "$STUDY_DIR/.study-tools/render.sh"
+echo "  [ok] .study-tools"
+
+for ctx_file in "$SCRIPT_DIR"/.context/*.md; do
+    [ -f "$ctx_file" ] && cp "$ctx_file" "$STUDY_DIR/.context/$(basename "$ctx_file")"
+done
+echo "  [ok] .context/ architecture docs"
+
+# .gitignore
+if [ ! -f "$STUDY_DIR/.gitignore" ]; then
+    printf ".study/\n.DS_Store\n*.log\n" > "$STUDY_DIR/.gitignore"
+    echo "  [ok] .gitignore"
+fi
+echo ""
+
+# --- 3. Daemon scripts ---
+echo "3. Study daemon:"
 
 for script in study-daemon.sh daily-review.sh on-wake.sh ctl.sh; do
     cp "$SCRIPT_DIR/.study-daemon/$script" "$STUDY_DIR/.study-daemon/$script"
@@ -75,8 +110,8 @@ else
 fi
 echo ""
 
-# --- 3. Claude Desktop MCP (if Claude Desktop is installed) ---
-echo "3. Claude Desktop integration:"
+# --- 4. Claude Desktop MCP (if Claude Desktop is installed) ---
+echo "4. Claude Desktop integration:"
 CLAUDE_DESKTOP_CONFIG="$HOME/Library/Application Support/Claude/claude_desktop_config.json"
 
 if [ -d "$HOME/Library/Application Support/Claude" ]; then
@@ -127,8 +162,8 @@ else
 fi
 echo ""
 
-# --- 4. macOS launchd plists ---
-echo "4. Background services (macOS):"
+# --- 5. macOS launchd plists ---
+echo "5. Background services (macOS):"
 if [ "$(uname)" = "Darwin" ]; then
     PLIST_DIR="$HOME/Library/LaunchAgents"
     mkdir -p "$PLIST_DIR"
@@ -238,7 +273,7 @@ PLIST
     echo ""
 
     # Start services
-    echo "5. Starting services..."
+    echo "6. Starting services..."
     bash "$STUDY_DIR/.study-daemon/ctl.sh" start
 else
     echo "  [skip] Not macOS — use cron or systemd to schedule the daemon"
@@ -249,10 +284,13 @@ echo "━━━━━━━━━━━━━━━━━━━━━━━━�
 echo "  Installation complete!"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
-echo "Claude Code (terminal):"
-echo "  cd $STUDY_DIR"
-echo "  claude"
-echo "  /init-session"
+echo "Next steps:"
+echo "  1. Add your module folders to $STUDY_DIR (or create symlinks)"
+echo "     Example: ln -s ~/Documents/MyCourse $STUDY_DIR/MyCourse"
+echo ""
+echo "  2. Run Claude Code and initialize:"
+echo "     cd $STUDY_DIR && claude"
+echo "     /init-session"
 echo ""
 echo "Claude Desktop:"
 echo "  1. Restart Claude Desktop"

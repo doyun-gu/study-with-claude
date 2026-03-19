@@ -65,37 +65,29 @@ All study data stays local on your machine.
 ### Quick Start
 
 ```bash
-# Clone and install
+# 1. Clone and install (one-time)
 git clone https://github.com/doyun-gu/study-with-claude.git ~/study-with-claude
 cd ~/study-with-claude && bash install.sh
-```
 
-The installer:
-1. Installs `/where-is-god` and `/update-thunder` global commands
-2. Sets up the background daemon and task queue
-3. Configures Claude Desktop's filesystem MCP server (if Desktop is installed)
-4. Generates a `desktop-instructions.md` template for your Claude Desktop Project
-5. Creates launchd services (macOS) for the daemon, daily review, and wake recovery
-
-### Set Up Your Study Directory
-
-```bash
-# Create workspace and add your modules
-mkdir -p ~/study
-cd ~/study
-
-# Option A: Symlink existing course folders (recommended)
+# 2. Add your course materials to ~/study/
+# Symlink existing folders (recommended — originals stay where they are):
 ln -s ~/Documents/EE301-Circuits ~/study/EE301-Circuits
-ln -s ~/Documents/MATH201-Linear-Algebra ~/study/MATH201-Linear-Algebra
+ln -s ~/Documents/MATH201-Algebra ~/study/MATH201-Algebra
 
-# Option B: Copy materials directly
+# Or copy directly:
 cp -r ~/Downloads/EE301-slides ~/study/EE301-Circuits
 
-# Bootstrap study-with-claude in this directory
-claude
-/where-is-god
-/init-session
+# 3. Initialize with Claude Code
+cd ~/study && claude
+/init-session    # Scans your materials, builds indexes, asks for exam dates
 ```
+
+The installer sets up everything in one step:
+1. Bootstraps `~/study/` with CLAUDE.md, 14 slash commands, and tools
+2. Starts the background daemon and task queue
+3. Configures Claude Desktop's filesystem MCP server (if Desktop is installed)
+4. Generates `desktop-instructions.md` for your Claude Desktop Project
+5. Creates launchd services (macOS) for the daemon, daily review, and wake recovery
 
 ### Set Up Claude Desktop
 
