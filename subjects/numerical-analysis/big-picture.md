@@ -109,26 +109,22 @@ Solving $y' = f(t, y)$, $y(t_0) = y_0$.
 
 ## Topic Map
 
-```
-Error Analysis ──────────────────────────────────┐
-  │                                               │
-  ├── Root Finding                                │
-  │     └── Newton needs f'(x) ← Differentiation │
-  │                                               │
-  ├── Interpolation                               │
-  │     ├── Basis for Integration rules           │
-  │     └── Basis for ODE methods                 │
-  │                                               │
-  ├── Integration                                 │
-  │     └── Used in implicit ODE solvers          │
-  │                                               │
-  ├── Linear Systems                              │
-  │     ├── Newton for systems needs this         │
-  │     ├── Implicit ODE solvers need this        │
-  │     └── Eigenvalue methods build on this      │
-  │                                               │
-  └── ODEs                                        │
-        └── Error analysis ties everything ───────┘
+```mermaid
+graph TD
+    EA["Error Analysis"] --> RF["Root Finding"]
+    EA --> INT["Interpolation"]
+    EA --> IG["Integration"]
+    EA --> LS["Linear Systems"]
+    EA --> ODE["ODEs"]
+
+    RF -->|"Newton needs f'(x)"| DIFF["Differentiation"]
+    INT -->|"basis for"| IG
+    INT -->|"basis for"| ODE
+    IG -->|"used in implicit solvers"| ODE
+    LS -->|"Newton for systems"| RF
+    LS -->|"implicit ODE solvers"| ODE
+    LS -->|"eigenvalue methods"| EIG["Eigenvalue Problems"]
+    ODE -->|"error analysis ties everything"| EA
 ```
 
 ---
