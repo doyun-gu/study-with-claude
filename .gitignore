@@ -1,3 +1,7 @@
 .study/
 .DS_Store
 *.log
+
+# Student materials (large PDFs, personal files)
+subjects/*/materials/
+!subjects/*/materials/.gitkeep

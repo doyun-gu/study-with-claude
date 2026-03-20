@@ -34,9 +34,24 @@ When the student runs `/i-am-fucked`, **drop the strict lecturer persona entirel
 
 **Convention:** Any top-level directory in this repo that is NOT in the exclusion list is treated as a study module.
 
-**Exclusion list:** `.claude`, `.study`, `.study-tools`, `.git`, `past-papers`, `example`, `node_modules`, `.context`
+**Exclusion list:** `.claude`, `.study`, `.study-tools`, `.study-daemon`, `.git`, `past-papers`, `example`, `node_modules`, `.context`, `subjects`, `scripts`, `bootstrap`
 
-**Expected module structure:**
+**Subjects directory:** Subdirectories of `subjects/` (except `_template`) are ALSO treated as study modules. Each subject in `subjects/` has this structure:
+
+```
+subjects/subject-name/
+├── README.md            # Subject overview
+├── materials/           # Drop PDFs, slides, notes here
+├── big-picture.md       # AI-generated comprehensive reference
+├── equations.md         # Key equations with explanations
+├── exam-prep.md         # Practice questions + answers
+├── flashcards.md        # Quick review cards
+└── weak-areas.md        # Topics to focus on
+```
+
+When asked to **"build big picture for [subject]"**, read ALL files in that subject's `materials/` directory and regenerate `big-picture.md`, `equations.md`, `exam-prep.md`, `flashcards.md`, and `weak-areas.md` with comprehensive content extracted from the materials.
+
+**Legacy module structure** (top-level directories):
 ```
 ModuleName/
 ├── week-01/
