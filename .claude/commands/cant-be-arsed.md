@@ -158,14 +158,11 @@ For each file, determine its destination using these rules (in priority order):
 
 **9. Everything else → `materials/`**
 
-**Smart renaming rules:**
-- Lowercase, kebab-case: `Commercial Development Week 1 2026 CVa.pdf` → `commercial-development-a.pdf`
-- Strip year/semester from filenames (implied by folder location)
-- Strip redundant words: "final", "2026", "_final_", "(1)"
-- Keep version/part indicators: `a`, `b`, `v2`, `part-1`
-- Keep meaningful suffixes: `Q` (questions), `A` (answers)
-- Preserve original name in the manifest for traceability
-- **If the file already has a clean, descriptive name — don't rename it**
+**File naming — prefer original names:**
+- **Default: keep original filenames.** Most students recognize their files by the names from Blackboard/Moodle. Renaming causes confusion.
+- **Only rename if:** (a) no existing folder convention is detected AND (b) the filename is truly messy (random UUIDs, `(1)` duplicates, extremely long names)
+- If renaming: lowercase kebab-case, strip `(1)` suffixes, keep meaningful parts (Q/A, version indicators, module codes)
+- **Always** record the original name in the manifest regardless of whether renaming occurred
 
 **Duplicate detection:**
 - Same filename at target → **skip**, report as duplicate
@@ -289,30 +286,57 @@ cp ~/Developer/study-with-claude/subjects/_template/weak-areas.md "$TARGET/weak-
 
 If existing study files are already present, leave them untouched.
 
-### Step 9: Respect Existing Structure
+### Step 9: Respect Existing Structure (CRITICAL — do this BEFORE Step 4)
 
-If the target folder already has organized content:
+**This step overrides the default organizing rules in Step 4.** If the target folder OR its parent directories already have organized content, you MUST detect and match the existing convention.
 
-1. **Detect existing convention:**
-   - Are folders named `week-01` or `Week 1` or `Lecture 1-3`?
-   - Are files kebab-case or original names?
-   - Is there a different subfolder structure?
+**Before organizing anything, scan for existing patterns:**
 
-2. **Match the existing pattern.** If the user has `Week 1/`, `Week 2/` folders, don't create `week-01/`.
+```bash
+# Check target and nearby directories for existing module folders
+ls "$TARGET" 2>/dev/null
+# Check sibling directories for naming conventions
+ls "$(dirname "$TARGET")" 2>/dev/null
+# Check if there's already a matching module folder elsewhere
+find ~/Documents -maxdepth 5 -type d -iname "*$(basename "$TARGET")*" 2>/dev/null
+```
 
-3. **Slot new files into existing folders.** Don't reorganize what's already there.
+**Convention detection checklist:**
 
-4. **Flag conflicts:** "materials/week-01/ already has `lecture-slides.pdf` — skip or replace?"
+1. **Folder naming:**
+   - `Week 1` vs `week-01` vs `week-01-IM1-3`?
+   - `Lab` vs `materials/lab/` vs `materials/coursework/`?
+   - `Tutorials` vs `materials/tutorials/`?
+   - `Quizzes` vs `materials/quizzes/`?
+   - Flat structure (folders at module root) vs nested under `materials/`?
+
+2. **File naming:**
+   - Original filenames preserved vs kebab-case renamed?
+   - If original names are used in existing folders → **keep original names for new files too**
+
+3. **Subfolder patterns:**
+   - Do tutorials have sub-groupings like `Part 1/`, `Part 2/`?
+   - Are weeks numbered by content range or by calendar week?
+
+4. **Match the existing pattern exactly.** Don't impose a new convention — adapt to what's already there.
+
+5. **If the module already exists elsewhere** (e.g., user typed a new path but the same module is at `02-EEE/Year-3/Semester II/EEEN30262-*`):
+   - Ask: "Found existing folder at `[path]`. Merge files there instead?"
+   - If yes, slot new files into the existing structure
+
+6. **Slot new files into existing folders.** Don't reorganize what's already there.
+
+7. **Flag conflicts:** "`Week 1/` already has `slides.pdf` — skip or replace?"
 
 ### Step 10: Print Summary
 
 ```
 ✓ Organized [N] files into [target-name]/
-  materials/week-01/   → [N] files
-  materials/week-02/   → [N] files
-  materials/tutorials/ → [N] files
-  materials/quizzes/   → [N] files
-  past-papers/         → [N] files
+  Week 1/     → [N] files added
+  Week 3/     → [N] files added
+  Tutorials/  → [N] files added
+  Quizzes/    → [N] files (new folder)
+  Lab/        → [N] files added
 
   Skipped: [N] duplicates
   ⚠ [N] files need PDF conversion (.pptx/.docx)
