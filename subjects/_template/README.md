@@ -20,6 +20,7 @@
    - `exam-prep.md` — practice questions at multiple difficulty levels
    - `flashcards.md` — quick review cards
    - `weak-areas.md` — topics that need more attention
+5. Run `/latex-notes [subject]` to generate professional LaTeX revision notes in `exam-prep/`
 
 ## Materials Checklist
 

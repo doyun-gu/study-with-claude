@@ -83,6 +83,8 @@ study-with-claude/
 ├── scripts/
 │   ├── new-subject.sh           # Create a subject from template
 │   └── build-reference.sh       # Trigger reference generation
+├── templates/
+│   └── exam-prep.tex            # LaTeX template for exam prep notes
 ├── CLAUDE.md                    # Instructions for Claude
 └── README.md                    # This file
 ```
@@ -175,6 +177,46 @@ Claude Code has the same access to your materials plus additional slash commands
 | `/weekly-plan` | Structured 7-day study plan |
 | `/where-i-am` | Progress dashboard |
 | `/i-am-fucked` | Emergency mode — what to study with minimal time |
+| `/latex-notes [subject]` | Generate professional LaTeX exam prep notes |
+| `/paperman [subject]` | Concepts & definitions → formatted PDF reference |
+
+---
+
+## LaTeX Exam Prep Notes
+
+Generate publication-quality revision documents from your study materials:
+
+```bash
+/latex-notes numerical-analysis              # All topics
+/latex-notes numerical-analysis "part 2"     # Specific part
+/latex-notes EE301 weeks 1-3                 # Week range
+```
+
+Claude reads your materials and produces a `.tex` file with:
+- Precise definitions, every equation boxed, variable definitions
+- TikZ diagrams and circuit schematics (where applicable)
+- Worked examples with varied numbers
+- Comparison tables, derivations, common mistakes
+- Summary section and self-test checklist
+
+A blank template is in `templates/exam-prep.tex` if you want to write one manually.
+
+Compile with:
+```bash
+pdflatex subjects/your-subject/exam-prep/output-file.tex
+```
+
+### Paperman — One-Command PDF Reference
+
+`/paperman` goes further: it organises your entire subject into a polished, print-ready PDF with a title page, table of contents, colour-highlighted key equations, exam tips, and self-test checklists.
+
+```bash
+/paperman numerical-analysis                 # Full subject reference
+/paperman numerical-analysis part 3          # Just one part
+/paperman EE301 "circuit analysis"           # Focused topic
+```
+
+Output lands in `<subject>/paperman/` as both `.tex` and compiled `.pdf` — ready to print or read on a tablet.
 
 ---
 

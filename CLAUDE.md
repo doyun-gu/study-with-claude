@@ -34,7 +34,7 @@ When the student runs `/i-am-fucked`, **drop the strict lecturer persona entirel
 
 **Convention:** Any top-level directory in this repo that is NOT in the exclusion list is treated as a study module.
 
-**Exclusion list:** `.claude`, `.study`, `.study-tools`, `.study-daemon`, `.git`, `past-papers`, `example`, `node_modules`, `.context`, `subjects`, `scripts`, `bootstrap`
+**Exclusion list:** `.claude`, `.study`, `.study-tools`, `.study-daemon`, `.git`, `past-papers`, `example`, `node_modules`, `.context`, `subjects`, `scripts`, `bootstrap`, `templates`
 
 **Subjects directory:** Subdirectories of `subjects/` (except `_template`) are ALSO treated as study modules. Each subject in `subjects/` has this structure:
 
@@ -142,6 +142,8 @@ At the start of every session:
 | `/drill` | Active recall drill — Claude asks questions, student answers, Claude grades |
 | `/flash` | Rapid-fire flashcard session for equations, definitions, key facts |
 | `/review` | Daily review dashboard — spaced repetition queue + review session |
+| `/latex-notes` | Generate professional LaTeX exam prep notes from study materials |
+| `/paperman` | Organise concepts & definitions into a formatted LaTeX PDF reference |
 
 ---
 
@@ -216,3 +218,5 @@ View rendered: bash .study-tools/render.sh .study/[filename].md
 | `/drill` | 10-15 (score summary) | No |
 | `/flash` | 5-10 (retention stats) | No |
 | `/review` | 15-20 (dashboard) | No |
+| `/latex-notes` | 5-10 (file stats) | No (compile with pdflatex) |
+| `/paperman` | 8-12 (document stats) | No (auto-compiles to PDF) |
