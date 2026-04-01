@@ -1,7 +1,11 @@
 .study/
+outputs/
 .DS_Store
 *.log
 
 # Student materials (large PDFs, personal files)
 subjects/*/materials/
 !subjects/*/materials/.gitkeep
+
+# Feynman research (user-specific)
+*.provenance.md

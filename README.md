@@ -13,17 +13,50 @@ Works for **any field**: engineering, medicine, law, business, sciences, humanit
 git clone https://github.com/doyun-gu/study-with-claude.git
 cd study-with-claude
 
-# 2. Create a subject
+# 2. Run the installer
+bash install.sh
+
+# 3. Create a subject
 bash scripts/new-subject.sh "Linear Algebra"
 
-# 3. Drop your materials in
+# 4. Drop your materials in
 cp ~/Downloads/lecture-slides.pdf subjects/linear-algebra/materials/
 cp ~/Downloads/week-*.pdf subjects/linear-algebra/materials/
 
-# 4. Open in Claude Desktop and start studying
+# 5. Open in Claude and start studying
+cd ~/study && claude
+/init-session
 ```
 
-That's it. Open the project in [Claude Desktop](https://claude.ai/download) or [Claude Code](https://docs.anthropic.com/en/docs/claude-code), and Claude has instant access to all your materials.
+---
+
+## Setup
+
+### Claude Code (CLI)
+
+The installer handles everything:
+```bash
+bash install.sh
+```
+
+### Claude Desktop
+
+1. Copy the MCP config: `setup/claude-desktop-config.example.json` → `~/Library/Application Support/Claude/claude_desktop_config.json`
+2. Edit it — replace `YOUR_HOME_DIR` with your home directory path
+3. Open `desktop-instructions-template.md`, replace `$STUDY_DIR` with your study path, paste into a Claude Desktop Project
+4. Restart Claude Desktop
+
+### Feynman Research Agent (optional)
+
+Deep, multi-agent cited research for complex topics:
+```bash
+curl -fsSL https://feynman.is/install | bash
+feynman setup
+```
+
+Then use `/deepresearch [topic]` in Claude Code, or ask Claude Desktop to research a topic deeply.
+
+**Full setup guide:** [`setup/README.md`](setup/README.md)
 
 ---
 
@@ -63,6 +96,13 @@ Claude generates questions at your level and explains what you get wrong.
 
 If you drop past exam papers into `materials/`, Claude identifies patterns and focuses your study time.
 
+### Deep research (with Feynman)
+
+> *"/deepresearch Nyquist stability criterion"*
+> *"Compare Newton-Raphson vs bisection vs secant methods"*
+
+Multi-agent research with cited sources — every claim backed by papers or authoritative references.
+
 ---
 
 ## Project Structure
@@ -80,12 +120,17 @@ study-with-claude/
 │   │   ├── flashcards.md        # Quick review cards
 │   │   └── weak-areas.md        # Topics to focus on
 │   └── your-subject/            # Create as many as you need
+├── setup/
+│   ├── README.md                # Full setup guide
+│   ├── claude-desktop-config.example.json  # MCP config template
+│   └── feynman.md               # Feynman research agent guide
 ├── scripts/
 │   ├── new-subject.sh           # Create a subject from template
 │   └── build-reference.sh       # Trigger reference generation
 ├── templates/
 │   └── exam-prep.tex            # LaTeX template for exam prep notes
-├── CLAUDE.md                    # Instructions for Claude
+├── desktop-instructions-template.md  # Claude Desktop project instructions
+├── CLAUDE.md                    # Instructions for Claude Code
 └── README.md                    # This file
 ```
 
@@ -109,6 +154,68 @@ mkdir -p subjects/organic-chemistry/materials
 
 ---
 
+## Slash Commands (Claude Code)
+
+| Command | What it does |
+|---------|-------------|
+| `/init-session` | Scan all materials, build indexes, set exam dates |
+| `/why [question]` | Direct answer with source citations |
+| `/big-picture` | Extract every equation, definition, theorem |
+| `/past-papers` | Analyze exam patterns and frequency |
+| `/diagnose` | Find your weak areas and knowledge gaps |
+| `/drill [topic]` | Active recall — Claude asks, you answer |
+| `/flash [topic]` | Rapid-fire flashcards |
+| `/mock-exam` | Generate a practice exam |
+| `/weekly-plan` | Structured 7-day study plan |
+| `/where-i-am` | Progress dashboard |
+| `/i-am-fucked` | Emergency mode — what to study with minimal time |
+| `/latex-notes [subject]` | Generate professional LaTeX exam prep notes |
+| `/paperman [subject]` | Concepts & definitions → formatted PDF reference |
+| `/deepresearch [topic]` | Multi-agent cited research via Feynman |
+| `/review` | Daily spaced repetition review session |
+| `/cant-be-arsed` | Auto-organize downloaded course files |
+
+---
+
+## Feynman Research Integration
+
+[Feynman](https://github.com/getcompanion-ai/feynman) adds multi-agent research capabilities to your study workflow:
+
+```
+Lead Agent (plans, delegates, synthesizes)
+  ├── Researcher (evidence gathering — papers, web, repos)
+  ├── Reviewer (adversarial audit — catches unsupported claims)
+  ├── Writer (structured drafting from research notes)
+  └── Verifier (citation checking, dead link cleanup)
+```
+
+### What it gives you
+
+- **Cited sources** — every claim has a URL or reference
+- **Adversarial verification** — a reviewer agent checks for unsupported claims
+- **Provenance tracking** — `.provenance.md` sidecar shows what was consulted, accepted, rejected
+- **Multi-angle research** — 3-6 researchers investigate different dimensions simultaneously
+
+### Study-specific commands
+
+```bash
+# Deep dive before an exam
+/deepresearch "Nyquist stability criterion — derivation, intuition, exam pitfalls"
+
+# Compare methods from your course
+feynman compare "Jacobi vs Gauss-Seidel vs SOR for linear systems"
+
+# Literature review for a dissertation
+feynman lit "dynamic phasor simulation methods for power systems"
+
+# Check your study notes against sources
+feynman review subjects/numerical-analysis/big-picture.md
+```
+
+Full reference: [`setup/feynman.md`](setup/feynman.md)
+
+---
+
 ## Supported File Types
 
 | Type | Status |
@@ -118,6 +225,37 @@ mkdir -p subjects/organic-chemistry/materials
 | `.txt` | Full support |
 | `.png`, `.jpg` | Full support — diagrams, handwritten notes, photos |
 | `.pptx`, `.docx` | Not supported — convert to PDF first |
+
+---
+
+## LaTeX Exam Prep Notes
+
+Generate publication-quality revision documents from your study materials:
+
+```bash
+/latex-notes numerical-analysis              # All topics
+/latex-notes numerical-analysis "part 2"     # Specific part
+/latex-notes EE301 weeks 1-3                 # Week range
+```
+
+Claude reads your materials and produces a `.tex` file with:
+- Precise definitions, every equation boxed, variable definitions
+- TikZ diagrams and circuit schematics (where applicable)
+- Worked examples with varied numbers
+- Comparison tables, derivations, common mistakes
+- Summary section and self-test checklist
+
+### Paperman — One-Command PDF Reference
+
+`/paperman` goes further: it organises your entire subject into a polished, print-ready PDF with a title page, table of contents, colour-highlighted key equations, exam tips, and self-test checklists.
+
+```bash
+/paperman numerical-analysis                 # Full subject reference
+/paperman numerical-analysis part 3          # Just one part
+/paperman EE301 "circuit analysis"           # Focused topic
+```
+
+Output lands in `<subject>/paperman/` as both `.tex` and compiled `.pdf`.
 
 ---
 
@@ -146,103 +284,22 @@ mkdir -p subjects/organic-chemistry/materials
 - *"Mock exam for [subject], 2 hours, past paper style"*
 - *"I have 3 days until my exam — what should I focus on?"*
 
----
-
-## Using with Claude Desktop
-
-1. Download [Claude Desktop](https://claude.ai/download)
-2. Create a **Project** and set the project folder to this repository
-3. Claude automatically has access to all your subjects and materials
-4. Start chatting — ask about any topic in your materials
-
-### Using with Claude Code
-
-```bash
-cd study-with-claude
-claude
-```
-
-Claude Code has the same access to your materials plus additional slash commands:
-
-| Command | What it does |
-|---------|-------------|
-| `/init-session` | Scan all materials, build indexes, set exam dates |
-| `/why [question]` | Direct answer with source citations |
-| `/big-picture` | Extract every equation, definition, theorem |
-| `/past-papers` | Analyze exam patterns and frequency |
-| `/diagnose` | Find your weak areas and knowledge gaps |
-| `/drill [topic]` | Active recall — Claude asks, you answer |
-| `/flash [topic]` | Rapid-fire flashcards |
-| `/mock-exam` | Generate a practice exam |
-| `/weekly-plan` | Structured 7-day study plan |
-| `/where-i-am` | Progress dashboard |
-| `/i-am-fucked` | Emergency mode — what to study with minimal time |
-| `/latex-notes [subject]` | Generate professional LaTeX exam prep notes |
-| `/paperman [subject]` | Concepts & definitions → formatted PDF reference |
-
----
-
-## LaTeX Exam Prep Notes
-
-Generate publication-quality revision documents from your study materials:
-
-```bash
-/latex-notes numerical-analysis              # All topics
-/latex-notes numerical-analysis "part 2"     # Specific part
-/latex-notes EE301 weeks 1-3                 # Week range
-```
-
-Claude reads your materials and produces a `.tex` file with:
-- Precise definitions, every equation boxed, variable definitions
-- TikZ diagrams and circuit schematics (where applicable)
-- Worked examples with varied numbers
-- Comparison tables, derivations, common mistakes
-- Summary section and self-test checklist
-
-A blank template is in `templates/exam-prep.tex` if you want to write one manually.
-
-Compile with:
-```bash
-pdflatex subjects/your-subject/exam-prep/output-file.tex
-```
-
-### Paperman — One-Command PDF Reference
-
-`/paperman` goes further: it organises your entire subject into a polished, print-ready PDF with a title page, table of contents, colour-highlighted key equations, exam tips, and self-test checklists.
-
-```bash
-/paperman numerical-analysis                 # Full subject reference
-/paperman numerical-analysis part 3          # Just one part
-/paperman EE301 "circuit analysis"           # Focused topic
-```
-
-Output lands in `<subject>/paperman/` as both `.tex` and compiled `.pdf` — ready to print or read on a tablet.
+### Deep research
+- *"/deepresearch [complex topic]"*
+- *"Research [topic] from multiple angles with citations"*
+- *"Compare [method A] vs [method B] with sources"*
 
 ---
 
 ## Tips
 
-- **Organise by week** if you can: `materials/week-01/`, `materials/week-02/`, etc. Claude will reference "Week 3, slide 12" instead of "page 47 of some PDF."
+- **Organise by week** if you can: `materials/week-01/`, `materials/week-02/`, etc.
 - **Include past papers** in your materials folder. Claude will analyze them and predict what's likely to appear.
-- **Use symlinks** if your files live elsewhere (iCloud, Dropbox, etc.):
+- **Use symlinks** if your files live elsewhere:
   ```bash
   ln -s ~/Documents/My-Course-Slides subjects/my-course/materials
   ```
 - **Multiple subjects** work great together — Claude can spot connections between them.
-
----
-
-## Sample Subject
-
-The repo includes `subjects/numerical-analysis/` with pre-populated reference files covering:
-- Root finding (Newton-Raphson, bisection, secant)
-- Interpolation (Lagrange, Newton, splines)
-- Numerical integration (trapezoidal, Simpson's, Gaussian quadrature)
-- Linear systems (Gaussian elimination, LU, iterative methods)
-- Eigenvalue problems (power method, QR)
-- ODEs (Euler, Runge-Kutta, stability)
-
-Browse these files to see what Claude generates from your materials.
 
 ---
 

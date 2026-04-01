@@ -144,6 +144,7 @@ At the start of every session:
 | `/review` | Daily review dashboard — spaced repetition queue + review session |
 | `/latex-notes` | Generate professional LaTeX exam prep notes from study materials |
 | `/paperman` | Organise concepts & definitions into a formatted LaTeX PDF reference |
+| `/deepresearch` | Multi-agent cited research on a topic via Feynman |
 
 ---
 

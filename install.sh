@@ -57,7 +57,7 @@ echo ""
 
 # --- 2. Bootstrap study directory ---
 echo "2. Study workspace ($STUDY_DIR):"
-mkdir -p "$STUDY_DIR/.claude/commands" "$STUDY_DIR/.study/tasks/pending" "$STUDY_DIR/.study/tasks/running" "$STUDY_DIR/.study/tasks/done" "$STUDY_DIR/.study/rendered" "$STUDY_DIR/.study/mock-exams" "$STUDY_DIR/.study-tools" "$STUDY_DIR/.context" "$STUDY_DIR/.study-daemon"
+mkdir -p "$STUDY_DIR/.claude/commands" "$STUDY_DIR/.study/tasks/pending" "$STUDY_DIR/.study/tasks/running" "$STUDY_DIR/.study/tasks/done" "$STUDY_DIR/.study/rendered" "$STUDY_DIR/.study/mock-exams" "$STUDY_DIR/.study/research" "$STUDY_DIR/.study-tools" "$STUDY_DIR/.context" "$STUDY_DIR/.study-daemon" "$STUDY_DIR/outputs"
 
 # Copy CLAUDE.md, commands, tools, and architecture docs
 cp "$SCRIPT_DIR/CLAUDE.md" "$STUDY_DIR/CLAUDE.md"
@@ -86,7 +86,7 @@ echo "  [ok] .context/ architecture docs"
 
 # .gitignore
 if [ ! -f "$STUDY_DIR/.gitignore" ]; then
-    printf ".study/\n.DS_Store\n*.log\n" > "$STUDY_DIR/.gitignore"
+    printf ".study/\noutputs/\n.DS_Store\n*.log\n" > "$STUDY_DIR/.gitignore"
     echo "  [ok] .gitignore"
 fi
 echo ""
@@ -108,10 +108,32 @@ if [ ! -f "$DAEMON_CONFIG_DIR/config" ]; then
 else
     echo "  [ok] Config already exists at $DAEMON_CONFIG_DIR/config"
 fi
+# Copy setup guide files
+mkdir -p "$STUDY_DIR/setup"
+for setup_file in "$SCRIPT_DIR"/setup/*; do
+    [ -f "$setup_file" ] && cp "$setup_file" "$STUDY_DIR/setup/$(basename "$setup_file")"
+done
+echo "  [ok] setup/ guide files"
+echo ""
+
+# --- 3.5. Feynman Research Agent ---
+echo "3. Feynman Research Agent:"
+if command -v feynman &>/dev/null; then
+    echo "  [ok] Feynman is installed ($(feynman --version 2>/dev/null || echo 'version unknown'))"
+    if [ -f "$HOME/.feynman/.env" ]; then
+        echo "  [ok] Feynman config exists at ~/.feynman/.env"
+    else
+        echo "  [warn] Feynman installed but not configured. Run: feynman setup"
+    fi
+else
+    echo "  [skip] Feynman not installed (optional)"
+    echo "         Install: curl -fsSL https://feynman.is/install | bash"
+    echo "         Guide:   setup/feynman.md"
+fi
 echo ""
 
 # --- 4. Claude Desktop MCP (if Claude Desktop is installed) ---
-echo "4. Claude Desktop integration:"
+echo "4. Claude Desktop integration (copy-paste setup):"
 CLAUDE_DESKTOP_CONFIG="$HOME/Library/Application Support/Claude/claude_desktop_config.json"
 
 if [ -d "$HOME/Library/Application Support/Claude" ]; then
@@ -149,14 +171,19 @@ if [ -d "$HOME/Library/Application Support/Claude" ]; then
         fi
     fi
 
-    # Copy desktop instructions template
+    # Copy desktop instructions template and replace placeholders with actual paths
     cp "$SCRIPT_DIR/desktop-instructions-template.md" "$STUDY_DIR/desktop-instructions.md"
-    sed -i '' "s|\$HOME/study|$STUDY_DIR|g" "$STUDY_DIR/desktop-instructions.md" 2>/dev/null || \
-    sed -i "s|\$HOME/study|$STUDY_DIR|g" "$STUDY_DIR/desktop-instructions.md" 2>/dev/null || true
-    echo "  [ok] Desktop instructions template at $STUDY_DIR/desktop-instructions.md"
+    sed -i '' "s|\\\$STUDY_DIR|$STUDY_DIR|g" "$STUDY_DIR/desktop-instructions.md" 2>/dev/null || \
+    sed -i "s|\\\$STUDY_DIR|$STUDY_DIR|g" "$STUDY_DIR/desktop-instructions.md" 2>/dev/null || true
+    echo "  [ok] Desktop instructions at $STUDY_DIR/desktop-instructions.md"
+    echo "       (paths pre-filled with $STUDY_DIR)"
     echo ""
     echo "  Next: Create a Project in Claude Desktop and paste the contents of"
     echo "        $STUDY_DIR/desktop-instructions.md as the custom instructions."
+    echo ""
+    echo "  Config template: setup/claude-desktop-config.example.json"
+    echo "  Copy to: ~/Library/Application Support/Claude/claude_desktop_config.json"
+    echo "  Replace YOUR_HOME_DIR with: $HOME"
 else
     echo "  [skip] Claude Desktop not found"
 fi
@@ -285,21 +312,29 @@ echo "  Installation complete!"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 echo "Next steps:"
-echo "  1. Add your module folders to $STUDY_DIR (or create symlinks)"
-echo "     Example: ln -s ~/Documents/MyCourse $STUDY_DIR/MyCourse"
 echo ""
-echo "  2. Run Claude Code and initialize:"
-echo "     cd $STUDY_DIR && claude"
-echo "     /init-session"
+echo "  Claude Code:"
+echo "    1. Add your module folders to $STUDY_DIR (or create symlinks)"
+echo "       Example: ln -s ~/Documents/MyCourse $STUDY_DIR/MyCourse"
+echo "    2. cd $STUDY_DIR && claude"
+echo "    3. /init-session"
 echo ""
-echo "Claude Desktop:"
-echo "  1. Restart Claude Desktop"
-echo "  2. Create a Project → paste contents of $STUDY_DIR/desktop-instructions.md"
-echo "  3. Start asking questions!"
+echo "  Claude Desktop:"
+echo "    1. Copy setup/claude-desktop-config.example.json to:"
+echo "       ~/Library/Application Support/Claude/claude_desktop_config.json"
+echo "       (replace YOUR_HOME_DIR with $HOME)"
+echo "    2. Restart Claude Desktop"
+echo "    3. Create a Project → paste contents of $STUDY_DIR/desktop-instructions.md"
+echo "    4. Start asking questions!"
 echo ""
-echo "Daemon control:"
-echo "  $STUDY_DIR/.study-daemon/ctl.sh status"
-echo "  $STUDY_DIR/.study-daemon/ctl.sh logs"
+echo "  Feynman (optional — deep cited research):"
+echo "    curl -fsSL https://feynman.is/install | bash && feynman setup"
+echo "    Then use /deepresearch [topic] in Claude Code"
 echo ""
-echo "Config: $DAEMON_CONFIG_DIR/config"
+echo "  Daemon control:"
+echo "    $STUDY_DIR/.study-daemon/ctl.sh status"
+echo "    $STUDY_DIR/.study-daemon/ctl.sh logs"
+echo ""
+echo "  Full setup guide: $STUDY_DIR/setup/README.md"
+echo "  Daemon config:    $DAEMON_CONFIG_DIR/config"
 echo ""
