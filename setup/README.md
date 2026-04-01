@@ -33,21 +33,31 @@ claude
 
 ## 2. Claude Desktop Setup
 
-### Step 1: Configure MCP (filesystem access)
+### Step 1: Configure MCP (filesystem read/write access)
 
-Claude Desktop needs MCP to read your local files. Copy the example config:
+Claude Desktop needs MCP to read your study materials and write to `.study/` state files. Copy the example config:
 
 ```bash
 # macOS
 cp setup/claude-desktop-config.example.json \
    "$HOME/Library/Application Support/Claude/claude_desktop_config.json"
 
+# Windows
+# Copy to %APPDATA%\Claude\claude_desktop_config.json
+
 # Or merge into your existing config if you already have one
 ```
 
-**Edit the config** — replace `YOUR_HOME_DIR` with your actual home directory path (e.g., `/Users/alice` or `/home/bob`).
+**Edit the config** — replace `YOUR_STUDY_DIR` with the absolute path to your study directory (e.g., `/Users/alice/study` or `/home/bob/study`).
+
+This gives Claude Desktop read/write access to:
+- Your study materials (PDFs, notes, slides)
+- `.study/` state files (qna-log, progress, drill scores)
+- Task queue files (for delegating work to Claude Code)
 
 See [`claude-desktop-config.example.json`](./claude-desktop-config.example.json) for the full template.
+
+> **Broader access:** If you want Claude Desktop to also read files outside your study directory (e.g., course folders elsewhere on disk), change `YOUR_STUDY_DIR` to your home directory path instead. This is less restrictive but more convenient if your materials are spread across multiple locations.
 
 ### Step 2: Add project instructions
 
@@ -133,7 +143,11 @@ Location:
 - **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
 - **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
 
-See [`claude-desktop-config.example.json`](./claude-desktop-config.example.json) for the template.
+The config sets up:
+- **`filesystem` MCP server** — gives Claude Desktop read/write access to your study directory so it can read materials and write to `.study/` state files (qna-log, drill-log, task queue)
+- **`preferences`** — enables scheduled tasks and web search for research
+
+See [`claude-desktop-config.example.json`](./claude-desktop-config.example.json) for the template. Replace `YOUR_STUDY_DIR` with your actual study directory path.
 
 ### Feynman config (`~/.feynman/.env`)
 

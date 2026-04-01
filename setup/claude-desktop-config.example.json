@@ -5,8 +5,13 @@
       "args": [
         "-y",
         "@modelcontextprotocol/server-filesystem",
-        "YOUR_HOME_DIR"
+        "YOUR_STUDY_DIR"
       ]
     }
+  },
+  "preferences": {
+    "coworkScheduledTasksEnabled": true,
+    "ccdScheduledTasksEnabled": true,
+    "coworkWebSearchEnabled": true
   }
 }

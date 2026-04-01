@@ -151,7 +151,7 @@ if [ -d "$HOME/Library/Application Support/Claude" ]; then
                     config.mcpServers = config.mcpServers || {};
                     config.mcpServers.filesystem = {
                         command: 'npx',
-                        args: ['-y', '@modelcontextprotocol/server-filesystem', '$HOME']
+                        args: ['-y', '@modelcontextprotocol/server-filesystem', '$STUDY_DIR']
                     };
                     fs.writeFileSync('$CLAUDE_DESKTOP_CONFIG', JSON.stringify(config, null, 2));
                 " && echo "  [ok] Filesystem MCP added to Claude Desktop" || echo "  [warn] Could not add MCP config — add manually"
@@ -162,7 +162,7 @@ if [ -d "$HOME/Library/Application Support/Claude" ]; then
     else
         # Create new config
         if command -v node &>/dev/null; then
-            echo '{"mcpServers":{"filesystem":{"command":"npx","args":["-y","@modelcontextprotocol/server-filesystem","'"$HOME"'"]}}}' | node -e "
+            echo '{"mcpServers":{"filesystem":{"command":"npx","args":["-y","@modelcontextprotocol/server-filesystem","'"$STUDY_DIR"'"]}},"preferences":{"coworkScheduledTasksEnabled":true,"ccdScheduledTasksEnabled":true,"coworkWebSearchEnabled":true}}' | node -e "
                 const fs = require('fs');
                 let data = '';
                 process.stdin.on('data', d => data += d);
@@ -183,7 +183,7 @@ if [ -d "$HOME/Library/Application Support/Claude" ]; then
     echo ""
     echo "  Config template: setup/claude-desktop-config.example.json"
     echo "  Copy to: ~/Library/Application Support/Claude/claude_desktop_config.json"
-    echo "  Replace YOUR_HOME_DIR with: $HOME"
+    echo "  Replace YOUR_STUDY_DIR with: $STUDY_DIR"
 else
     echo "  [skip] Claude Desktop not found"
 fi
@@ -322,7 +322,7 @@ echo ""
 echo "  Claude Desktop:"
 echo "    1. Copy setup/claude-desktop-config.example.json to:"
 echo "       ~/Library/Application Support/Claude/claude_desktop_config.json"
-echo "       (replace YOUR_HOME_DIR with $HOME)"
+echo "       (replace YOUR_STUDY_DIR with $STUDY_DIR)"
 echo "    2. Restart Claude Desktop"
 echo "    3. Create a Project → paste contents of $STUDY_DIR/desktop-instructions.md"
 echo "    4. Start asking questions!"

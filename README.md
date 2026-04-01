@@ -41,10 +41,10 @@ bash install.sh
 
 ### Claude Desktop
 
-1. Copy the MCP config: `setup/claude-desktop-config.example.json` → `~/Library/Application Support/Claude/claude_desktop_config.json`
-2. Edit it — replace `YOUR_HOME_DIR` with your home directory path
-3. Open `desktop-instructions-template.md`, replace `$STUDY_DIR` with your study path, paste into a Claude Desktop Project
-4. Restart Claude Desktop
+1. Copy `setup/claude-desktop-config.example.json` → `~/Library/Application Support/Claude/claude_desktop_config.json`
+2. Edit it — replace `YOUR_STUDY_DIR` with your study directory path (e.g., `/Users/alice/study`)
+3. Open `desktop-instructions-template.md`, replace `$STUDY_DIR` with the same path, paste into a Claude Desktop Project
+4. Restart Claude Desktop — Claude now has read/write access to your materials and state files
 
 ### Feynman Research Agent (optional)
 
