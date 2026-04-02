@@ -25,6 +25,34 @@ if ! command -v node &>/dev/null; then
     echo ""
 fi
 
+# Check pdftotext (needed for large PDF support)
+if command -v pdftotext &>/dev/null; then
+    echo "[ok] pdftotext found (large PDF support enabled)"
+else
+    echo ""
+    echo "pdftotext not found — required for large PDFs (200+ pages or 10+ MB)."
+    echo "Without it, large PDFs will be processed very slowly (5 pages at a time)."
+    echo ""
+    if command -v brew &>/dev/null; then
+        read -p "Install poppler now? (y/n) " -n 1 -r
+        echo ""
+        if [[ $REPLY =~ ^[Yy]$ ]]; then
+            echo "Installing poppler (provides pdftotext)..."
+            brew install poppler
+            echo "[ok] poppler installed"
+        else
+            echo "[skip] Install later with: brew install poppler"
+        fi
+    elif command -v apt &>/dev/null; then
+        echo "Install with: sudo apt install poppler-utils"
+    else
+        echo "Install poppler for your platform to enable large PDF support."
+        echo "  macOS:  brew install poppler"
+        echo "  Linux:  sudo apt install poppler-utils"
+    fi
+    echo ""
+fi
+
 mkdir -p "$COMMANDS_DIR"
 
 # --- Helper: symlink with backup ---
@@ -76,8 +104,10 @@ echo "  [ok] settings.local.json"
 
 cp "$SCRIPT_DIR/.study-tools/render.sh" "$STUDY_DIR/.study-tools/render.sh"
 cp "$SCRIPT_DIR/.study-tools/template.html" "$STUDY_DIR/.study-tools/template.html"
+cp "$SCRIPT_DIR/.study-tools/pdf-extract.sh" "$STUDY_DIR/.study-tools/pdf-extract.sh"
 chmod +x "$STUDY_DIR/.study-tools/render.sh"
-echo "  [ok] .study-tools"
+chmod +x "$STUDY_DIR/.study-tools/pdf-extract.sh"
+echo "  [ok] .study-tools (render, pdf-extract)"
 
 for ctx_file in "$SCRIPT_DIR"/.context/*.md; do
     [ -f "$ctx_file" ] && cp "$ctx_file" "$STUDY_DIR/.context/$(basename "$ctx_file")"

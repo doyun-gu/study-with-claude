@@ -10,6 +10,8 @@ You are answering a student's question in **direct answer mode**. This is the ON
 
 - Read `.study/content-index.md` to find exact file+page locations for the question's topic.
 - Read ONLY the identified pages from source materials (e.g., specific PDF page ranges or markdown sections).
+- **For large PDFs (≥10 MB):** Use `bash .study-tools/pdf-extract.sh <file> <start> <end>` instead of the Read tool to extract text. If the topic involves diagrams or visual content, also read 1-2 specific pages with the Read tool.
+- **For skeleton entries** (type = `skeleton` or `partial` in content-index): The pages haven't been fully scanned yet. Extract the full text for those pages now using `bash .study-tools/pdf-extract.sh <file> <start> <end>`, then update `.study/file-map.md` and `.study/content-index.md` to replace the `skeleton`/`partial` tag with the actual content type. This progressively fills in the index as topics are studied.
 - If the topic is not found in the content index, or if `.study/content-index.md` doesn't exist, fall back to reading `.study/context.md` and scanning full materials.
 - Read `.study/qna-log.md` if it exists, to check for similar past questions.
 

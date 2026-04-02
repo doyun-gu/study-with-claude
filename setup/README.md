@@ -21,6 +21,18 @@ This installs:
 - `.study/` state directory
 - Background daemon scripts (macOS)
 - `/where-is-god` and `/update-thunder` global commands
+- `pdf-extract.sh` for large PDF support (requires `poppler` — installer will prompt)
+
+### Large PDF support (recommended)
+
+If you have textbooks or materials over 200 pages / 10 MB, install `pdftotext`:
+
+```bash
+brew install poppler        # macOS
+sudo apt install poppler-utils  # Linux
+```
+
+This enables fast text extraction that bypasses size limits and uses ~5x fewer tokens. Without it, large PDFs are read 5 pages at a time (very slow and token-expensive).
 
 Then open your study directory in Claude Code:
 ```bash

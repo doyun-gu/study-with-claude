@@ -105,8 +105,10 @@ fi
 mkdir -p .study-tools
 cp "$SOURCE_ROOT/.study-tools/render.sh" .study-tools/render.sh
 cp "$SOURCE_ROOT/.study-tools/template.html" .study-tools/template.html
+cp "$SOURCE_ROOT/.study-tools/pdf-extract.sh" .study-tools/pdf-extract.sh
 chmod +x .study-tools/render.sh
-echo "  [ok] .study-tools/render.sh + template.html"
+chmod +x .study-tools/pdf-extract.sh
+echo "  [ok] .study-tools/render.sh + template.html + pdf-extract.sh"
 
 # --- Copy .context/ ---
 
@@ -161,7 +163,14 @@ echo "  Bootstrap complete!"
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo ""
 echo "  Commands:  $CMD_COUNT slash commands"
-echo "  Tools:     render.sh + template.html"
+echo "  Tools:     render.sh + template.html + pdf-extract.sh"
+
+if command -v pdftotext &>/dev/null; then
+    echo "  pdftotext: installed (large PDF support enabled)"
+else
+    echo "  pdftotext: ⚠ NOT FOUND — large PDFs (200+ pages) will be slow"
+    echo "             Install: brew install poppler (macOS) / sudo apt install poppler-utils (Linux)"
+fi
 
 if [ "$CLAUDEMD_STATUS" = "foreign" ]; then
     echo "  CLAUDE.md: ⚠ conflict (see above)"

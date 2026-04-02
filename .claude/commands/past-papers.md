@@ -12,7 +12,7 @@ Scan for past papers in these locations:
 ### Step 2: Read Each Paper
 
 For each past paper found:
-- Read the full content (for PDFs, paginate at 20 pages per read)
+- Read the full content. For **standard PDFs** (<10 MB): Read tool, 20 pages per read. For **large PDFs** (≥10 MB): use `bash .study-tools/pdf-extract.sh <file> <start> <end>`, 50 pages at a time
 - For image-based papers (scanned PDFs, `.png`, `.jpg`), describe the visual content
 - Extract:
   - **Year/semester** (from filename or content)

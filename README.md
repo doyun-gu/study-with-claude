@@ -46,6 +46,15 @@ bash install.sh
 3. Open `desktop-instructions-template.md`, replace `$STUDY_DIR` with the same path, paste into a Claude Desktop Project
 4. Restart Claude Desktop — Claude now has read/write access to your materials and state files
 
+### Large PDF Support (recommended)
+
+For textbooks and large PDFs (200+ pages or 10+ MB), install `pdftotext` for fast text extraction:
+```bash
+brew install poppler        # macOS
+sudo apt install poppler-utils  # Linux
+```
+Without this, large PDFs are read 5 pages at a time (slow). With it, text is extracted directly at ~5x fewer tokens.
+
 ### Feynman Research Agent (optional)
 
 Deep, multi-agent cited research for complex topics:

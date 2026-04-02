@@ -161,9 +161,62 @@ At the start of every session:
 
 ## Large File Handling
 
-For PDFs with 100+ pages, read in chunks of 20 pages at a time. Summarize each chunk before moving to the next. This prevents context overflow and ensures thorough coverage.
+### PDF Size Classification
 
-For image-heavy materials (`.png`, `.jpg`), read and describe the visual content. Diagrams, circuit schematics, and graphs contain critical information.
+Before reading any PDF, classify it by checking file size and page count:
+
+```bash
+bash .study-tools/pdf-extract.sh --info <file.pdf>
+```
+
+| Category | Criteria | Strategy | Token Cost (est.) |
+|----------|----------|----------|-------------------|
+| **Standard** | <10 MB AND <200 pages | Read tool, 20 pages/request | ~1.5K tokens/page |
+| **Large** | ≥10 MB OR ≥200 pages | `pdftotext` extraction, 50 pages/batch | ~300 tokens/page |
+| **Oversized** | ≥20 MB OR ≥500 pages | `pdftotext` + TOC-first progressive scan | ~50-100 tokens/page initially |
+
+### Standard PDFs (<10 MB, <200 pages)
+
+Read with the Read tool, 20 pages per request. This is the default behavior.
+
+### Large PDFs (≥10 MB OR ≥200 pages)
+
+Use CLI text extraction instead of the Read tool to avoid request size limits and reduce token usage:
+
+```bash
+bash .study-tools/pdf-extract.sh <file.pdf> <start_page> <end_page>
+```
+
+Process 50 pages of extracted text at a time. Note pages referencing figures ("Figure N", "Fig. N") for later visual reads if the student asks about those topics.
+
+### Oversized PDFs — Textbooks, 500+ pages
+
+Use progressive scanning to keep init costs low:
+
+1. **TOC scan:** `bash .study-tools/pdf-extract.sh --toc <file.pdf>` — extracts first 15 pages
+2. **Build skeleton index** from table of contents (chapter headings → page ranges)
+3. **Selective deep scan** — for each chapter, extract 3-5 representative pages to capture key topics and equations
+4. **On-demand detail** — remaining pages marked as `[skeleton]` in the index, fully scanned when the student queries those topics via `/why`, `/drill`, etc.
+
+This keeps `/init-session` under ~50K tokens even for 1000+ page textbooks.
+
+### pdftotext Requirement
+
+Large/oversized PDF handling requires `pdftotext` (from poppler):
+
+```bash
+brew install poppler    # macOS
+sudo apt install poppler-utils  # Linux
+bash .study-tools/pdf-extract.sh --check  # verify installation
+```
+
+If `pdftotext` is not available, fall back to the Read tool with **5 pages at a time** for large files.
+
+### Image-Heavy Materials
+
+For `.png`, `.jpg` files, read and describe visual content. Diagrams, circuit schematics, and graphs contain critical information.
+
+For PDFs processed via `pdftotext`, note references to figures and flag those pages for visual reads with the Read tool when the student asks about those topics specifically.
 
 ---
 

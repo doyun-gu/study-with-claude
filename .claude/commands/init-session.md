@@ -28,11 +28,26 @@ For each module found, recursively find all files:
 - **Readable:** `.pdf`, `.md`, `.txt`, `.png`, `.jpg`, `.jpeg`
 - **Unreadable (flag):** `.pptx`, `.docx`, `.xlsx` — warn the student to convert these to PDF
 
-**Count PDF pages** (for progress tracking). Run this bash command:
+**Count PDF pages and check file sizes** (for progress tracking and strategy classification):
 ```bash
 find . -name "*.pdf" ! -path "./.study/*" ! -path "./.claude/*" -exec mdls -name kMDItemNumberOfPages -raw {} \; -print 2>/dev/null
 ```
 This outputs `page_count\nfilepath` pairs. Parse the output to get per-file page counts. If `mdls` returns `(null)` for a file, estimate 20 pages. For non-PDF files (`.md`, `.txt`), count as 1 page each. Sum all page counts to get `total_pages`.
+
+```bash
+find . -name "*.pdf" ! -path "./.study/*" ! -path "./.claude/*" -exec stat -f "%z %N" {} \;
+```
+
+**Classify each PDF** for processing strategy:
+- **standard** — <10 MB AND <200 pages → Read tool (20 pages/request)
+- **large** — ≥10 MB OR ≥200 pages → `pdftotext` text extraction (50 pages/batch)
+- **oversized** — ≥20 MB OR ≥500 pages → `pdftotext` + TOC-first progressive scan
+
+**Check for pdftotext** (required for large/oversized PDFs):
+```bash
+bash .study-tools/pdf-extract.sh --check
+```
+If not available, warn the student: `"⚠ pdftotext not found. Large PDFs will be processed slowly (5 pages at a time). Install with: brew install poppler"`
 
 Write the initial checkpoint `.study/.init-checkpoint.md`:
 
@@ -57,8 +72,8 @@ pages_processed: 0
 
 ## File Inventory
 
-- [ ] relative/path/to/file1.pdf (24p)
-- [ ] relative/path/to/file2.pdf (30p)
+- [ ] relative/path/to/file1.pdf (24p, 2MB) [standard]
+- [ ] relative/path/to/file2.pdf (640p, 20MB) [oversized]
 - [ ] relative/path/to/notes.md (1p)
 ...
 
@@ -80,11 +95,35 @@ pages_processed: 0
 Process files in **batches of ~10 files**. For each batch:
 
 1. Take the next ~10 unchecked (`[ ]`) files from the File Inventory
-2. For each file in the batch:
-   - Read the content (for PDFs over 100 pages, read 20 pages at a time)
+2. For each file in the batch, use the strategy matching its classification:
+
+   **Standard PDFs** (<10 MB, <200 pages):
+   - Read with the Read tool, 20 pages at a time
    - Extract key topics, equations, definitions, and concepts
    - Identify topic-coherent page ranges (2-15 pages each) based on heading changes, new theorem/definition introductions, and subject shifts
-   - For markdown/text files: use H2/H3 section headings as the unit instead of pages
+
+   **Large PDFs** (≥10 MB OR ≥200 pages):
+   - Extract text with: `bash .study-tools/pdf-extract.sh <file> <start> <end>`
+   - Process 50 pages of text at a time (text uses ~5x fewer tokens than visual PDF reads)
+   - Extract key topics, equations, definitions from the text content
+   - Note pages referencing figures/diagrams (look for "Figure", "Fig.", "Diagram", "see illustration") — flag these for visual reads on demand
+   - Identify topic-coherent page ranges from the text content
+
+   **Oversized PDFs** (≥20 MB OR ≥500 pages):
+   - **Phase 1 — TOC scan:** Run `bash .study-tools/pdf-extract.sh --toc <file>` to extract first 15 pages. Parse the table of contents to identify chapter/section structure with page numbers.
+   - **Phase 2 — Selective deep scan:** For each chapter/section found in the TOC, extract 3-5 representative pages (start of chapter + pages with key terms) using `bash .study-tools/pdf-extract.sh <file> <start> <end>`. Extract topics, equations, definitions from these samples.
+   - **Build skeleton index:** Map all chapter/section headings to page ranges. Mark fully-scanned ranges as `scanned` and unscanned ranges as `skeleton`. The skeleton entries still appear in the file-map and content-index with `[skeleton]` tags so `/why` and other commands know these pages exist but haven't been deeply indexed yet.
+   - **Phase 3 is deferred:** Remaining pages are scanned on-demand when the student asks about those topics (via `/why`, `/drill`, etc.). When a skeleton entry is accessed, the command should extract the full text for those pages, update the file-map and content-index to remove the `[skeleton]` tag, and answer the question.
+   - Print notice after processing:
+     ```
+     ⚠ [filename] (N pages) — skeleton index built from TOC + selective scan.
+       Scanned: ~N pages | Skeleton: ~N pages (will scan on demand)
+       Deep scan available via /big-picture when you have session budget.
+     ```
+
+   **No pdftotext fallback:** If `pdftotext` is not available for large/oversized PDFs, use the Read tool with **5 pages at a time** (not 20) to stay under request size limits. This is slower and uses more tokens — warn the student.
+
+   For markdown/text files: use H2/H3 section headings as the unit instead of pages
 3. After completing the batch, update `.study/.init-checkpoint.md`:
    - Mark each processed file as `[x]` in the File Inventory
    - Update `processed`, `pages_processed`, and `last_updated` in frontmatter
@@ -208,6 +247,16 @@ total_pages: N
 | 4-11 | Basic circuit elements | Resistors, capacitors, inductors; passive sign convention |
 | 12-18 | Ohm's Law, KVL, KCL | Derivation, series/parallel circuits |
 
+### [relative/path/to/textbook.pdf]
+- **Pages:** 640 | **Type:** textbook | **Scan:** skeleton
+
+| Pages | Topics | Key Content | Status |
+|-------|--------|-------------|--------|
+| 1-45 | Fundamentals | Basic theory, core definitions | scanned |
+| 46-120 | Advanced Analysis | *From TOC: "Ch. 3 — Advanced Analysis"* | skeleton |
+| 121-135 | Design Methods | Key theorems (sampled pp.121-125) | partial |
+| 136-200 | Applications | *From TOC: "Ch. 5 — Applications"* | skeleton |
+
 ### [relative/path/to/notes.md]
 - **Sections:** N | **Type:** notes
 
@@ -216,6 +265,8 @@ total_pages: N
 | ## Basic Elements | Resistors, capacitors | Component equations, energy storage |
 | ## Kirchhoff's Laws | KVL, KCL | Statement, sign conventions |
 ```
+
+For **oversized PDFs**, include a `Status` column: `scanned` (fully indexed), `partial` (key pages sampled), or `skeleton` (from TOC only — will be scanned on demand). Skeleton entries should still list the topics from the TOC heading so they appear in the content-index for lookup.
 
 Keep page ranges topic-coherent — group by subject, not by fixed chunk size. Aim for ~3-4K tokens for a typical 5-module course.
 
@@ -248,6 +299,8 @@ modules: [Module1, Module2]
 | Norton's theorem | week-03/slides.pdf pp.19-30 | theorem+examples |
 | Ohm's Law | week-01/slides.pdf pp.12-13, week-01/notes.md §Basic-Elements | law |
 | Thevenin's theorem (Thevenin equivalent) | week-03/slides.pdf pp.3-18, week-03/notes.md §Thevenin | theorem+examples |
+| Advanced Analysis | textbook.pdf pp.46-120 | skeleton |
+| Design Methods | textbook.pdf pp.121-135 | partial |
 ```
 
 Aim for ~3K tokens for 150 entries. This index must be generated from the file-map data — no additional file reads.

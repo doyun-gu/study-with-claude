@@ -6,7 +6,12 @@ Extract every equation, definition, theorem, and key concept from all module mat
 
 Read `.study/context.md` for the full material inventory. Then read the actual source files for each module — not just summaries, the real content.
 
-For large PDFs, read 20 pages at a time systematically.
+**PDF reading strategy by classification** (see `CLAUDE.md` → Large File Handling):
+- **Standard PDFs** (<10 MB, <200 pages): Read tool, 20 pages at a time
+- **Large PDFs** (≥10 MB OR ≥200 pages): `bash .study-tools/pdf-extract.sh <file> <start> <end>`, 50 pages at a time
+- **Oversized PDFs** (≥20 MB OR ≥500 pages): `bash .study-tools/pdf-extract.sh <file> <start> <end>`, 50 pages at a time — this is where `/big-picture` does the deep scan that `/init-session` deferred
+
+For oversized PDFs that were skeleton-indexed during init, `/big-picture` performs the full deep scan. This may take multiple sessions — use the checkpoint/resume pattern. Update skeleton entries in file-map and content-index to `scanned` as pages are processed.
 
 ### Step 2: Extract Per Module and Week
 
