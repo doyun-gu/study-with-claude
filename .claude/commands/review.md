@@ -17,12 +17,16 @@ Examples:
 - `/review status` → dashboard only
 - `/review EE301` → dashboard + review EE301 items only
 
-### Step 2: Load All Review Data
+### Step 2: Merge Daily Q&A, Then Load All Review Data
+
+**Before reading `qna-log.md`, merge any unmerged daily files:**
+1. List all `.md` files in `.study/qna-daily/`
+2. If any exist: read each one, append entries to `qna-log.md` (dedup by concept — increment `asked_count` on matches), update `total_questions` and `last_updated` in the YAML header, then delete the daily files.
 
 Read:
 - `.study/drill-log.md` — drill review schedule (if exists)
 - `.study/flash-log.md` — flashcard intervals and due dates (if exists)
-- `.study/qna-log.md` — repeated questions, misconceptions (if exists)
+- `.study/qna-log.md` — repeated questions, misconceptions (now includes merged Desktop entries)
 - `.study/progress.md` — session history, exam dates
 - `.study/diagnosis.md` — weak areas (if exists)
 - `.study/past-paper-analysis.md` — exam frequencies (if exists)

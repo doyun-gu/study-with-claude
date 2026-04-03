@@ -2,14 +2,18 @@ Generate a structured weekly study plan based on diagnosis, exam dates, and past
 
 ## Instructions
 
-### Step 1: Load All State
+### Step 1: Merge Daily Q&A, Then Load All State
+
+**Before reading `qna-log.md`, merge any unmerged daily files:**
+1. List all `.md` files in `.study/qna-daily/`
+2. If any exist: read each one, append entries to `qna-log.md` (dedup by concept — increment `asked_count` on matches), update `total_questions` and `last_updated` in the YAML header, then delete the daily files.
 
 Read:
 - `.study/progress.md` — exam dates, current coverage
 - `.study/diagnosis.md` — weak areas, gaps
 - `.study/past-paper-analysis.md` — high-frequency topics
 - `.study/context.md` — available materials
-- `.study/qna-log.md` — what's been studied
+- `.study/qna-log.md` — what's been studied (now includes merged Desktop entries)
 
 If key files are missing, note which commands to run first:
 - No `diagnosis.md`? → "Run `/diagnose` first for a more targeted plan."

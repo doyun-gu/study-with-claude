@@ -4,7 +4,13 @@ Bootstrap study session — scan all materials, detect modules, and set exam dat
 
 You are initializing a study session. Follow these steps precisely.
 
-### Step 0: Check for Checkpoint
+### Step 0: Merge Daily Q&A + Check for Checkpoint
+
+**Merge any unmerged daily Q&A files from Claude Desktop:**
+1. List all `.md` files in `.study/qna-daily/`
+2. If any exist: read each one, append entries to `qna-log.md` (dedup by concept — increment `asked_count` on matches), update `total_questions` and `last_updated` in the YAML header, then delete the daily files.
+
+**Check for checkpoint:**
 
 Read `.study/.init-checkpoint.md`. If it exists:
 

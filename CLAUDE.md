@@ -96,13 +96,42 @@ All persistent state lives in `.study/`. This directory is gitignored — it con
 | `drill-log.md` | Drill session history, per-topic scores, review schedule | `/drill`, `/review` |
 | `flash-log.md` | Flashcard inventory, spaced repetition intervals, session stats | `/flash`, `/review` |
 | `.init-checkpoint.md` | Temporary — tracks `/init-session` progress for resume across sessions | `/init-session` (auto-deleted on completion) |
+| `qna-daily/*.md` | Daily Q&A scratch files from Claude Desktop (append-only, merged on read) | Claude Desktop |
+
+### Q&A Logging: Split Write / Merge Read
+
+To avoid blocking the Claude Desktop conversation with synchronous read-modify-write on `qna-log.md`, Q&A logging is split:
+
+- **Claude Desktop** writes to `qna-daily/YYYY-MM-DD.md` (append-only, no read needed — fast)
+- **Claude Code** writes directly to `qna-log.md` (as before, via `/why`, `/drill`, etc.)
+- **Before any command reads `qna-log.md`**, it MUST run the merge step below
+
+#### Merge Protocol (run before reading qna-log.md)
+
+```
+1. List all .md files in .study/qna-daily/
+2. If any exist:
+   a. Read .study/qna-log.md
+   b. For each daily file (oldest first):
+      - Read the file
+      - Append all ## entries to the end of qna-log.md
+      - For entries that match an existing topic (concept-level match):
+        increment asked_count on the existing entry instead of appending
+   c. Update total_questions count in the qna-log.md YAML header
+   d. Update last_updated to today
+   e. Delete the daily files after successful merge
+3. Proceed with reading qna-log.md as normal
+```
+
+This merge is idempotent — if it crashes halfway, re-running it produces the same result.
 
 ### Auto-Logging Mandate
 
 **Every interaction involving learning MUST update `.study/` files.** Even without explicit commands:
-- If a student asks a question → append to `qna-log.md`
+- If in Claude Code → append to `qna-log.md` directly
+- If in Claude Desktop → append to `qna-daily/YYYY-MM-DD.md` (fast, no-read)
 - If a topic is discussed → update `progress.md` topic coverage
-- If a misconception is corrected → note in `qna-log.md` with priority bump
+- If a misconception is corrected → note with priority bump
 
 This is non-negotiable. State must persist across sessions.
 
@@ -111,6 +140,8 @@ This is non-negotiable. State must persist across sessions.
 ## Session Startup Behavior
 
 At the start of every session:
+
+0. **Merge daily Q&A:** List `.study/qna-daily/*.md`. If any files exist, merge them into `qna-log.md` (dedup by concept, update counts), then delete the daily files. This ensures Desktop Q&A is always available before any analysis.
 
 1. **If `.study/context.md` exists:** Read it silently. Greet with a one-line status:
    > "Welcome back. You have [N] modules loaded. [Days] days until your nearest exam ([Module]). Last session: [date]. What are we working on?"

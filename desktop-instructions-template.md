@@ -17,20 +17,22 @@ If `modules.md` doesn't exist yet, fall back to reading `$STUDY_DIR/.study/conte
 
 ### State files (all in `.study/`)
 
-| File | Purpose |
-|------|---------|
-| `modules.md` | Module registry — what modules exist, which state files they have, material paths |
-| `progress.md` | Exam dates, topic coverage checklists, session log |
-| `context.md` | Full material inventory from last scan |
-| `qna-log.md` | All past Q&A — check before answering to avoid repetition |
-| `daily-summary.md` | Today's review items and focus areas (updated daily, may not exist) |
-| `drill-log.md` | Active recall scores and review schedule |
-| `flash-log.md` | Flashcard retention stats |
-| `content-index.md` | Topic → file:pages reverse lookup |
-| `file-map.md` | File → topics forward lookup |
-| `big-picture.md` | All equations, definitions, concept maps |
-| `diagnosis.md` | Known weak areas (if exists) |
-| `past-paper-analysis.md` | Past paper frequency matrix (may not exist) |
+| File | Purpose | Desktop can write? |
+|------|---------|-------------------|
+| `modules.md` | Module registry — what modules exist, which state files they have | NO |
+| `progress.md` | Exam dates, topic coverage checklists, session log | NO |
+| `context.md` | Full material inventory from last scan | NO |
+| `qna-log.md` | All past Q&A — check before answering to avoid repetition | NO (use qna-daily/) |
+| `qna-daily/*.md` | Daily Q&A scratch files — fast append-only logging | YES |
+| `daily-summary.md` | Today's review items and focus areas | NO |
+| `drill-log.md` | Active recall scores and review schedule | YES |
+| `flash-log.md` | Flashcard retention stats | YES |
+| `content-index.md` / `content-index-*.md` | Topic → file:pages reverse lookup | NO |
+| `file-map.md` / `file-map-*.md` | File → topics forward lookup | NO |
+| `big-picture.md` / `big-picture-*.md` | All equations, definitions, concept maps | NO |
+| `diagnosis.md` | Known weak areas (if exists) | NO |
+| `past-paper-analysis.md` | Past paper frequency matrix (may not exist) | NO |
+| `tasks/pending/*.task.md` | Task queue for Claude Code | YES (create) |
 
 ### Module materials
 
@@ -58,23 +60,36 @@ Subjects in `subjects/` have: `materials/`, `big-picture.md`, `equations.md`, `e
 
 ### What you should NOT do:
 - Don't hallucinate content — if you can't find it in the materials, say so
-- Don't modify state files that Claude Code manages: `context.md`, `progress.md`, `modules.md`, `file-map*.md`, `content-index*.md`, `big-picture*.md`
-- You CAN write to: `qna-log.md`, `drill-log.md`, `flash-log.md`, and `tasks/pending/`
+- Don't modify state files that Claude Code manages: `context.md`, `progress.md`, `modules.md`, `qna-log.md`, `file-map*.md`, `content-index*.md`, `big-picture*.md`
+- You CAN write to: `qna-daily/*.md` (Q&A logging), `drill-log.md`, `flash-log.md`, and `tasks/pending/`
 
 ---
 
-## CRITICAL: Auto-Logging Every Q&A
+## Q&A Logging (Fast — Append-Only)
 
-**After EVERY study-related question you answer, you MUST log it to the qna-log.**
+**After answering a study question, append the entry to a daily scratch file. Do NOT read or modify `qna-log.md` — Claude Code merges daily files automatically.**
 
 ### How to log:
 
-1. Read `$STUDY_DIR/.study/qna-log.md`
-2. Increment the `total_questions` count in the YAML header
-3. Update `last_updated` to today's date
-4. Append a new entry at the END of the file
+Append to `$STUDY_DIR/.study/qna-daily/YYYY-MM-DD.md` (use today's date).
 
-### Entry format (match this exactly):
+- **Do NOT read the file first** — just append to it
+- **Do NOT read or write `qna-log.md`** — Claude Code owns that file
+- If the daily file doesn't exist yet, create it with the header below then append
+
+### Daily file header (only on first entry of the day):
+
+```markdown
+---
+date: YYYY-MM-DD
+source: claude-desktop
+entry_count: 0
+---
+```
+
+Increment `entry_count` each time you append. (If you lose count, that's fine — Claude Code reconciles on merge.)
+
+### Entry format:
 
 ```markdown
 ## YYYY-MM-DD — [Short title of the question]
@@ -93,14 +108,16 @@ Subjects in `subjects/` have: `materials/`, `big-picture.md`, `equations.md`, `e
 **Source:** [Which files/pages you read to answer]
 
 [Your answer — include key equations and concepts. Keep it concise but complete.]
+
+---
 ```
 
 ### Logging rules:
 - **Every** study question gets logged — no exceptions
-- If the same topic was asked before, increment `Asked count` and update the answer
 - If the student had a **misconception**, set `Priority: high` and note it
 - The `Source: claude-desktop` tag lets Claude Code distinguish Desktop vs CLI questions
 - Log AFTER you give the answer (don't make them wait)
+- If you answered a topic that was asked before (from conversation context), note: `**Previously asked:** yes — see qna-log.md`
 
 ### What NOT to log:
 - Casual conversation, meta questions about the system, file listing requests

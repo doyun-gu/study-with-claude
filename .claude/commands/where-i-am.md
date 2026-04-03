@@ -12,12 +12,16 @@ If `$ARGUMENTS` contains a manual update (e.g., "studied EE301 week-05"):
 - Update `.study/progress.md` to mark that topic as covered
 - Confirm: "Marked [topic] in [module] as studied."
 
-### Step 2: Load State
+### Step 2: Merge Daily Q&A, Then Load State
+
+**Before reading `qna-log.md`, merge any unmerged daily files:**
+1. List all `.md` files in `.study/qna-daily/`
+2. If any exist: read each one, append entries to `qna-log.md` (dedup by concept — increment `asked_count` on matches), update `total_questions` and `last_updated` in the YAML header, then delete the daily files.
 
 Read:
 - `.study/progress.md` — coverage data, exam dates, session history
 - `.study/context.md` — total topics per module
-- `.study/qna-log.md` — question count and topics asked about
+- `.study/qna-log.md` — question count and topics asked about (now includes merged Desktop entries)
 - `.study/diagnosis.md` — weak areas (if exists)
 - `.study/drill-log.md` — drill scores and review schedule (if exists)
 - `.study/flash-log.md` — flashcard intervals and due dates (if exists)

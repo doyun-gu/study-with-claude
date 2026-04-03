@@ -85,7 +85,7 @@ echo ""
 
 # --- 2. Bootstrap study directory ---
 echo "2. Study workspace ($STUDY_DIR):"
-mkdir -p "$STUDY_DIR/.claude/commands" "$STUDY_DIR/.study/tasks/pending" "$STUDY_DIR/.study/tasks/running" "$STUDY_DIR/.study/tasks/done" "$STUDY_DIR/.study/rendered" "$STUDY_DIR/.study/mock-exams" "$STUDY_DIR/.study/research" "$STUDY_DIR/.study-tools" "$STUDY_DIR/.context" "$STUDY_DIR/.study-daemon" "$STUDY_DIR/outputs"
+mkdir -p "$STUDY_DIR/.claude/commands" "$STUDY_DIR/.study/tasks/pending" "$STUDY_DIR/.study/tasks/running" "$STUDY_DIR/.study/tasks/done" "$STUDY_DIR/.study/rendered" "$STUDY_DIR/.study/mock-exams" "$STUDY_DIR/.study/research" "$STUDY_DIR/.study/qna-daily" "$STUDY_DIR/.study-tools" "$STUDY_DIR/.context" "$STUDY_DIR/.study-daemon" "$STUDY_DIR/outputs"
 
 # Copy CLAUDE.md, commands, tools, and architecture docs
 cp "$SCRIPT_DIR/CLAUDE.md" "$STUDY_DIR/CLAUDE.md"

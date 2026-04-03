@@ -2,11 +2,15 @@ Diagnose weak areas, knowledge gaps, and study priorities based on all available
 
 ## Instructions
 
-### Step 1: Read All State Files
+### Step 1: Merge Daily Q&A, Then Read All State Files
 
-Load every available `.study/` file:
+**Before reading `qna-log.md`, merge any unmerged daily files:**
+1. List all `.md` files in `.study/qna-daily/`
+2. If any exist: read each one, append entries to `qna-log.md` (dedup by concept — increment `asked_count` on matches), update `total_questions` and `last_updated` in the YAML header, then delete the daily files.
+
+Then load every available `.study/` file:
 - `context.md` — module inventory and topics
-- `qna-log.md` — question history and priorities
+- `qna-log.md` — question history and priorities (now includes merged Desktop entries)
 - `progress.md` — coverage metrics and exam dates
 - `past-paper-analysis.md` — exam topic frequencies
 - `big-picture.md` — concept inventory

@@ -4,11 +4,15 @@ Emergency mode — generate a ruthlessly prioritized cheat sheet for last-minute
 
 ## Instructions
 
-### Step 1: Load Everything
+### Step 1: Merge Daily Q&A, Then Load Everything
+
+**Before reading `qna-log.md`, merge any unmerged daily files:**
+1. List all `.md` files in `.study/qna-daily/`
+2. If any exist: read each one, append entries to `qna-log.md` (dedup by concept — increment `asked_count` on matches), update `total_questions` and `last_updated` in the YAML header, then delete the daily files.
 
 Read ALL `.study/` files:
 - `context.md` — what materials exist
-- `qna-log.md` — what they've studied and struggled with
+- `qna-log.md` — what they've studied and struggled with (now includes merged Desktop entries)
 - `progress.md` — coverage and exam dates
 - `past-paper-analysis.md` — what gets tested
 - `big-picture.md` — all equations and concepts
