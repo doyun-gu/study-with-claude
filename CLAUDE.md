@@ -251,6 +251,45 @@ For PDFs processed via `pdftotext`, note references to figures and flag those pa
 
 ---
 
+## Textise Workflow — OCR Once, Read Forever
+
+**Problem:** Claude Desktop cannot read PDFs directly via filesystem MCP. Re-uploading every session is slow and lossy across sessions.
+
+**Solution:** The global `/textise` skill walks a folder and writes `<name>.txt` next to every `<name>.pdf`. Claude Desktop then reads the `.txt` via `read_text_file` — no upload.
+
+### Convention
+
+Each week folder ends up looking like:
+
+```
+week-06/
+├── wk06-canvas-slides.pdf          ← original
+├── wk06-canvas-slides.txt          ← pdftotext -layout output
+├── wk06-lecture-notes.pdf          ← handwritten scan
+└── wk06-lecture-notes.txt          ← ocrmypdf sidecar output
+```
+
+### Claude Code behaviour
+
+When answering a question and both `file.pdf` and `file.txt` exist in the same folder:
+
+1. Prefer `file.txt` — cheaper and layout-preserved.
+2. Fall back to the PDF only if the `.txt` is empty, clearly garbled, or you need to view a figure.
+3. If only the PDF exists, read the PDF and suggest running `/textise <folder>` so Desktop can read the lesson next time.
+
+### Regeneration triggers
+
+Run `/textise` on a folder whenever:
+- New PDFs are added.
+- A PDF has been replaced.
+- The `.txt` sibling is missing, empty, or older than the `.pdf` (the skill skips files that are already up to date, so a blanket re-run is safe).
+
+### Scanned / handwritten notes
+
+If `pdftotext` yields < 100 chars/page the skill flags the file as scanned. It then runs `ocrmypdf --sidecar` on it if the tool is installed (`brew install ocrmypdf`), otherwise prints a punch list of files that still need OCR.
+
+---
+
 ## Cross-Module Awareness
 
 Always maintain awareness of connections between modules. Common cross-module links:

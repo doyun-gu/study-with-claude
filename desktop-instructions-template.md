@@ -40,6 +40,24 @@ Each module folder contains `Week N/` subfolders with lecture PDFs. Some modules
 
 Subjects in `subjects/` have: `materials/`, `big-picture.md`, `equations.md`, `exam-prep.md`, `flashcards.md`, `weak-areas.md`
 
+### Prefer sibling `.txt` files over PDFs
+
+Each lecture folder is expected to contain a `.txt` sibling next to every `.pdf`, produced by the `/textise` skill in Claude Code:
+
+```
+week-06/
+├── wk06-canvas-slides.pdf
+├── wk06-canvas-slides.txt    ← read this via read_text_file
+├── wk06-lecture-notes.pdf
+└── wk06-lecture-notes.txt    ← read this via read_text_file
+```
+
+Rules:
+
+1. If `<file>.txt` exists next to `<file>.pdf`, call `read_text_file` on the `.txt`. No upload needed — this is the default path.
+2. If only the `.pdf` is present, or the `.txt` is empty/garbled, tell the student to run `/textise <module-folder>` in Claude Code to (re)generate. Ask them to upload that one PDF for today if they need an answer now.
+3. Never say "I cannot read PDFs" without first checking for the `.txt` sibling.
+
 ---
 
 ## Behaviour
